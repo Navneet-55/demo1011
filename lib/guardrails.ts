@@ -1,0 +1,194 @@
+import { Mode, Intent } from '@/types'
+
+export interface ClarifyingQuestion {
+  questions: string[]
+  reason: string
+}
+
+export interface UncertaintyCheck {
+  isUncertain: boolean
+  reason?: string
+  verificationSteps?: string[]
+}
+
+export const guardrails = {
+  /**
+   * Detects if input is ambiguous and generates clarifying questions
+   */
+  detectAmbiguity(input: string, intent: Intent): ClarifyingQuestion | null {
+    const trimmed = input.trim().toLowerCase()
+    
+    // Too short or vague
+    if (trimmed.length < 10) {
+      return {
+        questions: [
+          'Could you provide more context or details?',
+          'What specific aspect would you like me to explain?'
+        ],
+        reason: 'Input is too brief'
+      }
+    }
+
+    // Vague language detection
+    const vagueTerms = ['this', 'it', 'that', 'something', 'stuff', 'thing']
+    const hasOnlyVagueTerms = vagueTerms.some(term => 
+      trimmed === term || trimmed.startsWith(term + ' ')
+    )
+    
+    if (hasOnlyVagueTerms) {
+      return {
+        questions: [
+          'What specifically are you referring to?',
+          'Can you paste the code or error message you\'re asking about?'
+        ],
+        reason: 'Input contains only vague references'
+      }
+    }
+
+    // Debug intent without error message
+    if (intent === 'debug' && !trimmed.includes('error') && !trimmed.includes('exception')) {
+      const hasStackTrace = /at\s+\w+|line\s+\d+|:\d+:\d+/.test(trimmed)
+      if (!hasStackTrace) {
+        return {
+          questions: [
+            'What error message or unexpected behavior are you seeing?',
+            'Can you share the full error stacktrace?'
+          ],
+          reason: 'Debug request without clear error information'
+        }
+      }
+    }
+
+    // Test generation without language
+    if (intent === 'test') {
+      const hasLanguageIndicator = /javascript|typescript|python|java|c\+\+|ruby|go|rust/i.test(input)
+      if (!hasLanguageIndicator && input.length < 50) {
+        return {
+          questions: [
+            'What programming language is this code in?',
+            'What testing framework would you like to use?'
+          ],
+          reason: 'Test generation request without language context'
+        }
+      }
+    }
+
+    return null
+  },
+
+  /**
+   * Checks if the AI should express uncertainty
+   */
+  checkUncertainty(input: string, intent: Intent): UncertaintyCheck {
+    const trimmed = input.trim().toLowerCase()
+
+    // Very domain-specific or obscure topics
+    const obscurePatterns = [
+      /proprietary|internal|custom framework|legacy system/i,
+      /\b\w{20,}\b/, // Very long technical terms
+      /version\s*[\d.]+\s*specific/i
+    ]
+
+    for (const pattern of obscurePatterns) {
+      if (pattern.test(input)) {
+        return {
+          isUncertain: true,
+          reason: 'Domain-specific or proprietary context detected',
+          verificationSteps: [
+            'Check official documentation for this specific framework/library',
+            'Verify version-specific behavior',
+            'Test in your actual environment'
+          ]
+        }
+      }
+    }
+
+    // Incomplete code snippets
+    if (intent === 'debug' || intent === 'test') {
+      const hasEllipsis = /\.{3,}|\/\/\s*\.{3}|\/\*\s*\.{3}/.test(input)
+      if (hasEllipsis) {
+        return {
+          isUncertain: true,
+          reason: 'Code snippet appears incomplete',
+          verificationSteps: [
+            'Share the complete code context',
+            'Include surrounding code that might affect behavior'
+          ]
+        }
+      }
+    }
+
+    return { isUncertain: false }
+  },
+
+  /**
+   * Structures the AI response with required sections
+   */
+  buildStructuredPrompt(basePrompt: string, mode: Mode, intent: Intent): string {
+    const structure = `
+You must structure your response with these sections:
+
+**Summary** (2-3 sentences)
+Brief overview of what you're explaining.
+
+**Step-by-Step** (if applicable)
+Numbered steps or detailed breakdown.
+
+**Example** (if applicable)
+Concrete code example or scenario.
+
+**Common Mistakes**
+Typical pitfalls or errors to avoid.
+
+**Next Actions**
+What the user should do next or further resources.
+
+${basePrompt}
+`
+    return structure
+  },
+
+  /**
+   * Detects intent from user input
+   */
+  detectIntent(input: string): Intent {
+    const trimmed = input.trim().toLowerCase()
+
+    // Debug patterns
+    if (
+      /error|exception|bug|crash|fail|broken|doesn't work|not working/i.test(input) ||
+      /traceback|stacktrace|at\s+\w+\.\w+|line\s+\d+/i.test(input)
+    ) {
+      return 'debug'
+    }
+
+    // Test generation
+    if (
+      /test|unit test|integration test|mock|stub|spec/i.test(input) ||
+      trimmed.startsWith('generate test') ||
+      trimmed.includes('write test')
+    ) {
+      return 'test'
+    }
+
+    // Documentation
+    if (
+      /what is|what does|explain|how does|documentation|docs/i.test(input) ||
+      /definition|meaning|purpose/i.test(input)
+    ) {
+      return 'learn'
+    }
+
+    // Summarization
+    if (/summarize|summary|tldr|brief|quick overview/i.test(input)) {
+      return 'summarize'
+    }
+
+    // Documentation lookup
+    if (/api|method|function|class.*do|parameter|argument/i.test(input)) {
+      return 'docs'
+    }
+
+    return 'general'
+  }
+}

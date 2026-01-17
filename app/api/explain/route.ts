@@ -1,12 +1,13 @@
 import Groq from 'groq-sdk'
 import { NextRequest, NextResponse } from 'next/server'
+import { toolRegistry } from '@/lib/tools'
+import { guardrails } from '@/lib/guardrails'
+import { ExplanationTrace, Mode, Intent } from '@/types'
 
 // Initialize Groq (will be null if API key not provided)
 const groq = process.env.GROQ_API_KEY 
   ? new Groq({ apiKey: process.env.GROQ_API_KEY })
   : null
-
-type Mode = 'Beginner' | 'Student' | 'Pro'
 
 const systemPrompts: Record<Mode, string> = {
   Beginner: `You are GyaanForge, an expert AI mentor that forges deep understanding from code.
@@ -217,21 +218,133 @@ const getExplanation = async (input: string, mode: Mode, forceOffline: boolean =
 
 export async function POST(req: NextRequest) {
   try {
-    const { input, mode, forceOffline } = await req.json()
+    const { input, mode, forceOffline, toolId, context } = await req.json()
 
     if (!input || !mode) {
       return new NextResponse('Missing required fields', { status: 400 })
     }
 
-    const stream = await getExplanation(input, mode as Mode, forceOffline === true)
+    const startTime = Date.now()
+    const detectedIntent = guardrails.detectIntent(input)
+    
+    // Use tool if specified, otherwise use default explanation
+    let finalPrompt: string
+    let clarifyingQuestions: string[] | null = null
+    let trace: ExplanationTrace
 
-    return new NextResponse(stream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
-    })
+    if (toolId) {
+      // Using Dev Copilot tool
+      const result = toolRegistry.buildPromptForTool(toolId, input, mode as Mode, context)
+      finalPrompt = result.prompt
+      clarifyingQuestions = result.clarifyingQuestions
+
+      // Check for uncertainty
+      const uncertaintyCheck = guardrails.checkUncertainty(input, detectedIntent)
+
+      // Build trace
+      trace = toolRegistry.createTrace(
+        toolId,
+        mode as Mode,
+        detectedIntent,
+        clarifyingQuestions,
+        uncertaintyCheck
+      )
+
+      // If we have clarifying questions, return them first
+      if (clarifyingQuestions && clarifyingQuestions.length > 0) {
+        const clarifyResponse = `**Before I proceed, I need to clarify a few things:**\n\n${clarifyingQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n')}\n\n*Please provide more details so I can give you a better answer.*`
+        
+        trace.processingTimeMs = Date.now() - startTime
+
+        return NextResponse.json({
+          type: 'clarification',
+          questions: clarifyingQuestions,
+          trace
+        })
+      }
+
+      // Add uncertainty warning if needed
+      if (trace.guardrails.uncertaintyFlag) {
+        finalPrompt = `**⚠️ Note:** ${trace.guardrails.uncertaintyReason}\n\n${finalPrompt}\n\n**Verification Steps:**\n${guardrails.checkUncertainty(input, detectedIntent).verificationSteps?.map(step => `- ${step}`).join('\n') || ''}`
+      }
+    } else {
+      // Standard explanation (original flow)
+      const uncertaintyCheck = guardrails.checkUncertainty(input, detectedIntent)
+      const ambiguityCheck = guardrails.detectAmbiguity(input, detectedIntent)
+
+      finalPrompt = `${systemPrompts[mode as Mode]}\n\nUser question:\n${input}`
+
+      if (ambiguityCheck) {
+        clarifyingQuestions = ambiguityCheck.questions
+      }
+
+      trace = {
+        mode: mode as Mode,
+        intent: detectedIntent,
+        responseFormat: 'structured',
+        guardrails: {
+          askedClarifyingQuestions: clarifyingQuestions !== null,
+          questionsAsked: clarifyingQuestions || undefined,
+          uncertaintyFlag: uncertaintyCheck.isUncertain,
+          uncertaintyReason: uncertaintyCheck.reason,
+          structuredOutputApplied: true
+        },
+        timestamp: Date.now()
+      }
+
+      if (clarifyingQuestions && clarifyingQuestions.length > 0) {
+        const clarifyResponse = `**I'd like to understand better:**\n\n${clarifyingQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n')}\n\n*This will help me provide a more accurate explanation.*`
+        
+        trace.processingTimeMs = Date.now() - startTime
+
+        return NextResponse.json({
+          type: 'clarification',
+          questions: clarifyingQuestions,
+          trace
+        })
+      }
+
+      if (trace.guardrails.uncertaintyFlag && uncertaintyCheck.verificationSteps) {
+        finalPrompt = `⚠️ **I might be uncertain about some aspects.** ${uncertaintyCheck.reason}\n\n${finalPrompt}\n\n**Please verify:**\n${uncertaintyCheck.verificationSteps.map(step => `- ${step}`).join('\n')}`
+      }
+    }
+
+    const stream = await getExplanation(finalPrompt, mode as Mode, forceOffline === true)
+    
+    trace.processingTimeMs = Date.now() - startTime
+
+    // Create a new stream that includes both content and trace
+    const encoder = new TextEncoder()
+    const reader = stream.getReader()
+    
+    return new NextResponse(
+      new ReadableStream({
+        async start(controller) {
+          // First, send the trace as a special message
+          controller.enqueue(encoder.encode(`__TRACE__${JSON.stringify(trace)}__TRACE__`))
+          
+          // Then stream the content
+          try {
+            while (true) {
+              const { done, value } = await reader.read()
+              if (done) break
+              controller.enqueue(value)
+            }
+            controller.close()
+          } catch (error) {
+            console.error('Streaming error:', error)
+            controller.close()
+          }
+        }
+      }),
+      {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      }
+    )
   } catch (error) {
     console.error('API Error:', error)
     return new NextResponse('Internal Server Error', { status: 500 })
