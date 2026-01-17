@@ -1,9 +1,10 @@
-import { OpenAI } from 'openai'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 import { NextRequest, NextResponse } from 'next/server'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+// Initialize Gemini (will be null if API key not provided)
+const genAI = process.env.GEMINI_API_KEY 
+  ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+  : null
 
 type Mode = 'Beginner' | 'Student' | 'Pro'
 
