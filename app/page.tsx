@@ -7,22 +7,26 @@ import { OutputPanel } from '@/components/OutputPanel'
 import DevCopilot from '@/components/DevCopilot'
 import WhyThisAnswer from '@/components/WhyThisAnswer'
 import ImpactWidget from '@/components/ImpactWidget'
+import { KnowledgeGraphVisualizer } from '@/components/KnowledgeGraphVisualizer'
+import { ConceptExplorer } from '@/components/ConceptExplorer'
 import { useMode } from '@/components/ModeProvider'
 import { useOnlineOffline } from '@/contexts/OnlineOfflineContext'
+import { useKnowledgeGraph } from '@/contexts/KnowledgeGraphContext'
 import { ExplanationTrace, ImpactMetrics, Intent } from '@/types'
-import { storageUtils } from '@/lib/localStorage'
 
 export const dynamic = 'force-dynamic'
 
 export default function Home() {
   const { mode } = useMode()
   const { effectiveMode } = useOnlineOffline()
+  const { addGraph } = useKnowledgeGraph()
   const [input, setInput] = useState('')
   const [output, setOutput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [trace, setTrace] = useState<ExplanationTrace | null>(null)
   const [currentIntent, setCurrentIntent] = useState<Intent>('general')
   const [showDevCopilot, setShowDevCopilot] = useState(false)
+  const [showKnowledgeGraph, setShowKnowledgeGraph] = useState(true)
 
   const handleSubmit = async (
     inputText?: string,
@@ -105,6 +109,26 @@ export default function Home() {
                 )
               } catch (e) {
                 console.error('Failed to parse trace:', e)
+              }
+            }
+          }
+
+          // Extract knowledge graph if present
+          if (accumulatedText.includes('__GRAPH__')) {
+            const graphMatch = accumulatedText.match(
+              /__GRAPH__(.+?)__GRAPH__/
+            )
+            if (graphMatch) {
+              try {
+                const extractedGraph = JSON.parse(graphMatch[1])
+                addGraph(extractedGraph)
+                // Remove graph from output
+                accumulatedText = accumulatedText.replace(
+                  /__GRAPH__.+?__GRAPH__/,
+                  ''
+                )
+              } catch (e) {
+                console.error('Failed to parse knowledge graph:', e)
               }
             }
           }
