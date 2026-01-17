@@ -18,6 +18,7 @@ import { TracePanel } from '@/components/TracePanel'
 import { PracticePanel } from '@/components/PracticePanel'
 import { QuizFlow } from '@/components/QuizFlow'
 import { StuckInterventionBanner } from '@/components/StuckInterventionBanner'
+import { CommandPalette } from '@/components/CommandPalette'
 import { Tabs } from '@/components/ui/index'
 import { useMode } from '@/components/ModeProvider'
 import { useOnlineOffline } from '@/contexts/OnlineOfflineContext'
@@ -31,6 +32,7 @@ import { generateFallbackMetadata } from '@/lib/meta-fallback'
 import { analyzeStuckState } from '@/lib/stuckDetector'
 import { COGNITIVE_LOAD_CONFIG, STORAGE_KEYS, DEBUG_CONFIG } from '@/lib/constants'
 import { sanitizeString } from '@/lib/validators'
+import { useCommandPaletteShortcut } from '@/lib/keyboard-shortcuts'
 
 export const dynamic = 'force-dynamic'
 
@@ -60,6 +62,12 @@ export default function Home() {
   const [currentMetadata, setCurrentMetadata] = useState<ResponseMetadata | null>(null)
   const [showRightPanel, setShowRightPanel] = useState(true)
   const [stuckDismissed, setStuckDismissed] = useState(false)
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false)
+
+  // Setup Cmd/Ctrl+K shortcut for command palette
+  useCommandPaletteShortcut(() => {
+    setIsPaletteOpen(true)
+  })
 
   // Load cognitive load preference from localStorage with validation
   useEffect(() => {
