@@ -131,13 +131,13 @@ Without AI processing, detailed analysis is limited. Key observations:
 }
 
 // Try Gemini API, fallback to local if unavailable
-const getExplanation = async (input: string, mode: Mode): Promise<ReadableStream<Uint8Array>> => {
+const getExplanation = async (input: string, mode: Mode, forceOffline: boolean = false): Promise<ReadableStream<Uint8Array>> => {
   const encoder = new TextEncoder()
 
-  // Try Gemini if API key is available
-  if (genAI) {
+  // Try Gemini if API key is available and not forcing offline
+  if (!forceOffline && genAI) {
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+      const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
       const prompt = `${systemPrompts[mode]}\n\nUser question:\n${input}`
       
       const result = await model.generateContentStream(prompt)
@@ -187,13 +187,13 @@ const getExplanation = async (input: string, mode: Mode): Promise<ReadableStream
 
 export async function POST(req: NextRequest) {
   try {
-    const { input, mode } = await req.json()
+    const { input, mode, forceOffline } = await req.json()
 
     if (!input || !mode) {
       return new NextResponse('Missing required fields', { status: 400 })
     }
 
-    const stream = await getExplanation(input, mode as Mode)
+    const stream = await getExplanation(input, mode as Mode, forceOffline === true)
 
     return new NextResponse(stream, {
       headers: {

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { ModeProvider } from '@/components/ModeProvider'
+import { OnlineOfflineProvider } from '@/contexts/OnlineOfflineContext'
 
 export const metadata: Metadata = {
   title: 'GyaanForge - AI-Powered Learning Platform',
@@ -18,7 +19,9 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <ModeProvider>
-            {children}
+            <OnlineOfflineProvider>
+              {children}
+            </OnlineOfflineProvider>
           </ModeProvider>
         </ThemeProvider>
       </body>

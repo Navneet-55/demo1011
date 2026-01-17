@@ -5,11 +5,13 @@ import { Header } from '@/components/Header'
 import { InputPanel } from '@/components/InputPanel'
 import { OutputPanel } from '@/components/OutputPanel'
 import { useMode } from '@/components/ModeProvider'
+import { useOnlineOffline } from '@/contexts/OnlineOfflineContext'
 
 export const dynamic = 'force-dynamic'
 
 export default function Home() {
   const { mode } = useMode()
+  const { effectiveMode } = useOnlineOffline()
   const [input, setInput] = useState('')
   const [output, setOutput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -29,6 +31,7 @@ export default function Home() {
         body: JSON.stringify({
           input: input.trim(),
           mode,
+          forceOffline: effectiveMode === 'offline',
         }),
       })
 

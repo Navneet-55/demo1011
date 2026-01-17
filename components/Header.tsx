@@ -2,6 +2,7 @@
 
 import { useTheme } from './ThemeProvider'
 import { ModeToggle } from './ModeToggle'
+import { OnlineOfflineToggle } from './OnlineOfflineToggle'
 
 export function Header() {
   const { theme, toggleTheme } = useTheme()
@@ -9,7 +10,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-950/90 backdrop-blur-md shadow-sm dark:shadow-md transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-16 gap-4">
           {/* Logo with enhanced gradient */}
           <div className="flex-shrink-0 group">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-purple-700 bg-clip-text text-transparent hover:from-blue-700 hover:via-purple-700 hover:to-purple-800 transition-all duration-300 cursor-default select-none">
@@ -25,10 +26,15 @@ export function Header() {
             <ModeToggle />
           </div>
 
+          {/* Online/Offline Toggle */}
+          <div className="flex-shrink-0">
+            <OnlineOfflineToggle />
+          </div>
+
           {/* Enhanced Dark Mode Toggle */}
           <button
             onClick={toggleTheme}
-            className="relative p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group overflow-hidden"
+            className="flex-shrink-0 relative p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group overflow-hidden"
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             title={`${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
           >
