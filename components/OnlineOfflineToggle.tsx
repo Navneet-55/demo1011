@@ -17,7 +17,7 @@ export function OnlineOfflineToggle() {
           }`}
           title={
             effectiveMode === 'online'
-              ? 'Using Gemini API'
+              ? 'Using Groq API'
               : 'Using Offline Mode'
           }
         />

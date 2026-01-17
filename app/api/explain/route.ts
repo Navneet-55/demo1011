@@ -130,25 +130,29 @@ Without AI processing, detailed analysis is limited. Key observations:
   return responses[mode]
 }
 
-// Try Gemini API, fallback to local if unavailable
+// Try Groq API, fallback to local if unavailable
 const getExplanation = async (input: string, mode: Mode, forceOffline: boolean = false): Promise<ReadableStream<Uint8Array>> => {
   const encoder = new TextEncoder()
 
-  // Try Gemini if API key is available and not forcing offline
-  if (!forceOffline && genAI) {
+  // Try Groq if API key is available and not forcing offline
+  if (!forceOffline && groq) {
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
       const prompt = `${systemPrompts[mode]}\n\nUser question:\n${input}`
       
-      const result = await model.generateContentStream(prompt)
+      const stream = await groq.chat.completions.create({
+        model: 'mixtral-8x7b-32768',
+        messages: [{ role: 'user', content: prompt }],
+        stream: true,
+        temperature: 0.7,
+        max_tokens: 1024,
+      })
       
       return new ReadableStream({
         async start(controller) {
           try {
-            for await (const chunk of result.stream) {
-              const text = chunk.text()
-              if (text) {
-                controller.enqueue(encoder.encode(text))
+            for await (const chunk of stream) {
+              if (chunk.choices[0]?.delta?.content) {
+                controller.enqueue(encoder.encode(chunk.choices[0].delta.content))
               }
             }
             controller.close()
@@ -159,7 +163,7 @@ const getExplanation = async (input: string, mode: Mode, forceOffline: boolean =
         },
       })
     } catch (error) {
-      console.log('Gemini API unavailable, using local mode:', error)
+      console.log('Groq API unavailable, using local mode:', error)
       // Fall through to local mode
     }
   }
