@@ -32,6 +32,7 @@ export default function Home() {
   const { mode } = useMode()
   const { effectiveMode } = useOnlineOffline()
   const { addGraph } = useKnowledgeGraph()
+  const { state: sessionState } = useLearningSession()
   const [input, setInput] = useState('')
   const [output, setOutput] = useState('')
   const [fullOutput, setFullOutput] = useState('')
@@ -82,6 +83,10 @@ export default function Home() {
           forceOffline: effectiveMode === 'offline',
           toolId,
           context,
+          timebox: sessionState.timebox,
+          perspective: sessionState.perspective,
+          futureYou: sessionState.futureYou,
+          stuckScore: sessionState.stuckState.score,
         }),
       })
 
@@ -329,6 +334,11 @@ export default function Home() {
                 onSubmit={() => handleSubmit()}
                 isLoading={isLoading}
               />
+              
+              {/* Feature #4: Timebox Control */}
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <TimeboxControl />
+              </div>
               
               {/* Error Input Section */}
               {showErrorDebugger && (
