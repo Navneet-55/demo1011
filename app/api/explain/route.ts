@@ -2,7 +2,6 @@ import Groq from 'groq-sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { toolRegistry } from '@/lib/tools'
 import { guardrails } from '@/lib/guardrails'
-import { extractConceptsFromText } from '@/lib/conceptExtractor'
 import { ExplanationTrace, Mode, Intent } from '@/types'
 
 // Initialize Groq (will be null if API key not provided)
@@ -314,7 +313,7 @@ export async function POST(req: NextRequest) {
     
     trace.processingTimeMs = Date.now() - startTime
 
-    // Create a new stream that includes both content, trace, and knowledge graph
+    // Create a new stream that includes both content and trace
     const encoder = new TextEncoder()
     const reader = stream.getReader()
     
@@ -324,30 +323,13 @@ export async function POST(req: NextRequest) {
           // First, send the trace as a special message
           controller.enqueue(encoder.encode(`__TRACE__${JSON.stringify(trace)}__TRACE__`))
           
-          // Collect full text for concept extraction
-          let fullText = ''
-          
           // Then stream the content
           try {
             while (true) {
               const { done, value } = await reader.read()
               if (done) break
-              
-              // Decode and accumulate text
-              const chunk = new TextDecoder().decode(value)
-              fullText += chunk
-              
               controller.enqueue(value)
             }
-            
-            // After streaming is complete, extract concepts and send knowledge graph
-            try {
-              const knowledgeGraph = extractConceptsFromText(fullText, input)
-              controller.enqueue(encoder.encode(`__GRAPH__${JSON.stringify(knowledgeGraph)}__GRAPH__`))
-            } catch (error) {
-              console.error('Failed to extract knowledge graph:', error)
-            }
-            
             controller.close()
           } catch (error) {
             console.error('Streaming error:', error)

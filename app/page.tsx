@@ -1,33 +1,52 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Header } from '@/components/Header'
 import { InputPanel } from '@/components/InputPanel'
 import { OutputPanel } from '@/components/OutputPanel'
 import DevCopilot from '@/components/DevCopilot'
 import WhyThisAnswer from '@/components/WhyThisAnswer'
 import ImpactWidget from '@/components/ImpactWidget'
-import { KnowledgeGraphVisualizer } from '@/components/KnowledgeGraphVisualizer'
-import { ConceptExplorer } from '@/components/ConceptExplorer'
 import { useMode } from '@/components/ModeProvider'
 import { useOnlineOffline } from '@/contexts/OnlineOfflineContext'
-import { useKnowledgeGraph } from '@/contexts/KnowledgeGraphContext'
-import { ExplanationTrace, ImpactMetrics, Intent } from '@/types'
+import { ExplanationTrace, ImpactMetrics, Intent, CognitiveLoadMode } from '@/types'
 import { storageUtils } from '@/lib/localStorage'
 
 export const dynamic = 'force-dynamic'
 
+const COGNITIVE_LOAD_CONFIG = {
+  overwhelmed: { chunkSize: 150, delay: 100, label: '🧘 Overwhelmed' },
+  balanced: { chunkSize: 300, delay: 50, label: '⚖️ Balanced' },
+  speed: { chunkSize: 600, delay: 20, label: '⚡ Speed' },
+  mastery: { chunkSize: 0, delay: 0, label: '🎓 Mastery' },
+}
+
 export default function Home() {
   const { mode } = useMode()
   const { effectiveMode } = useOnlineOffline()
-  const { addGraph } = useKnowledgeGraph()
   const [input, setInput] = useState('')
   const [output, setOutput] = useState('')
+  const [fullOutput, setFullOutput] = useState('')
+  const [chunkIndex, setChunkIndex] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [trace, setTrace] = useState<ExplanationTrace | null>(null)
   const [currentIntent, setCurrentIntent] = useState<Intent>('general')
   const [showDevCopilot, setShowDevCopilot] = useState(false)
-  const [showKnowledgeGraph, setShowKnowledgeGraph] = useState(true)
+  const [cognitiveLoad, setCognitiveLoad] = useState<CognitiveLoadMode>('balanced')
+
+  // Load cognitive load preference from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('cognitiveLoad')
+    if (saved && ['overwhelmed', 'balanced', 'speed', 'mastery'].includes(saved)) {
+      setCognitiveLoad(saved as CognitiveLoadMode)
+    }
+  }, [])
+
+  // Save cognitive load preference to localStorage
+  const handleCognitiveLoadChange = (mode: CognitiveLoadMode) => {
+    setCognitiveLoad(mode)
+    localStorage.setItem('cognitiveLoad', mode)
+  }
 
   const handleSubmit = async (
     inputText?: string,
@@ -114,27 +133,19 @@ export default function Home() {
             }
           }
 
-          // Extract knowledge graph if present
-          if (accumulatedText.includes('__GRAPH__')) {
-            const graphMatch = accumulatedText.match(
-              /__GRAPH__(.+?)__GRAPH__/
-            )
-            if (graphMatch) {
-              try {
-                const extractedGraph = JSON.parse(graphMatch[1])
-                addGraph(extractedGraph)
-                // Remove graph from output
-                accumulatedText = accumulatedText.replace(
-                  /__GRAPH__.+?__GRAPH__/,
-                  ''
-                )
-              } catch (e) {
-                console.error('Failed to parse knowledge graph:', e)
-              }
-            }
+          // Apply chunked rendering based on cognitive load
+          const config = COGNITIVE_LOAD_CONFIG[cognitiveLoad]
+          if (config.chunkSize > 0 && accumulatedText.length > config.chunkSize) {
+            // Store full output but only show first chunk
+            setFullOutput(accumulatedText)
+            setChunkIndex(1)
+            setOutput(accumulatedText.slice(0, config.chunkSize))
+          } else {
+            // Show all immediately (mastery mode or text is short)
+            setOutput(accumulatedText)
+            setFullOutput('')
+            setChunkIndex(0)
           }
-
-          setOutput(accumulatedText)
         }
       }
       
@@ -163,6 +174,24 @@ export default function Home() {
     storageUtils.saveMetric(fullMetrics)
   }
 
+  const handleContinue = () => {
+    if (!fullOutput) return
+    
+    const config = COGNITIVE_LOAD_CONFIG[cognitiveLoad]
+    const nextChunk = (chunkIndex + 1) * config.chunkSize
+    
+    if (nextChunk >= fullOutput.length) {
+      // Show all
+      setOutput(fullOutput)
+      setChunkIndex(0)
+      setFullOutput('')
+    } else {
+      // Show next chunk
+      setOutput(fullOutput.slice(0, nextChunk))
+      setChunkIndex(chunkIndex + 1)
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-950">
       <Header />
@@ -173,17 +202,25 @@ export default function Home() {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             GyaanForge
           </h1>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setShowKnowledgeGraph(!showKnowledgeGraph)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
-                showKnowledgeGraph
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-              }`}
-            >
-              {showKnowledgeGraph ? '🌐 Graph On' : '🌐 Graph Off'}
-            </button>
+          <div className="flex gap-3 items-center">
+            {/* Cognitive Load Selector */}
+            <div className="flex gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+              {(Object.keys(COGNITIVE_LOAD_CONFIG) as CognitiveLoadMode[]).map((loadMode) => (
+                <button
+                  key={loadMode}
+                  onClick={() => handleCognitiveLoadChange(loadMode)}
+                  className={`px-3 py-1.5 rounded text-sm font-medium transition-all ${
+                    cognitiveLoad === loadMode
+                      ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                  title={COGNITIVE_LOAD_CONFIG[loadMode].label}
+                >
+                  {COGNITIVE_LOAD_CONFIG[loadMode].label}
+                </button>
+              ))}
+            </div>
+            
             <button
               onClick={() => setShowDevCopilot(!showDevCopilot)}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
@@ -222,8 +259,8 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          /* Standard View with Knowledge Graph */
-          <div className={`grid ${showKnowledgeGraph ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1 lg:grid-cols-2'} gap-6 h-[calc(100vh-16rem)]`}>
+          /* Standard View */
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-16rem)]">
             <div className="flex flex-col">
               <InputPanel
                 mode={mode}
@@ -235,6 +272,19 @@ export default function Home() {
             </div>
             <div className="flex flex-col space-y-4" data-output-panel>
               <OutputPanel content={output} isLoading={isLoading} />
+              
+              {/* Continue Button for Chunked Content */}
+              {fullOutput && !isLoading && (
+                <div className="flex justify-center">
+                  <button
+                    onClick={handleContinue}
+                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-all shadow-lg"
+                  >
+                    Continue Reading →
+                  </button>
+                </div>
+              )}
+              
               {trace && !isLoading && <WhyThisAnswer trace={trace} />}
               {!output && !isLoading && (
                 <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-600">
@@ -244,16 +294,6 @@ export default function Home() {
                 </div>
               )}
             </div>
-            {showKnowledgeGraph && (
-              <div className="flex flex-col gap-4 h-full">
-                <div className="flex-1 min-h-0">
-                  <KnowledgeGraphVisualizer />
-                </div>
-                <div className="h-64 min-h-0 overflow-hidden">
-                  <ConceptExplorer />
-                </div>
-              </div>
-            )}
           </div>
         )}
       </main>

@@ -4,6 +4,8 @@ export type Intent = 'learn' | 'debug' | 'docs' | 'summarize' | 'test' | 'genera
 
 export type ResponseFormat = 'steps' | 'bullets' | 'code-first' | 'analogy' | 'structured'
 
+export type CognitiveLoadMode = 'overwhelmed' | 'balanced' | 'speed' | 'mastery'
+
 export interface ExplanationTrace {
   mode: Mode
   intent: Intent
