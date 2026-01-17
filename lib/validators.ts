@@ -5,7 +5,8 @@
 
 import { LEARNING_CONSTANTS, STUCK_DETECTION, QUIZ_CONFIG } from '@/lib/constants'
 import type { LearningSessionState, StuckSignal, MasteryRecord } from '@/types/learning-features'
-import type { Timebox, Perspective, Mode } from '@/types/api-contract'
+import type { Timebox, Perspective } from '@/types/api-contract'
+import type { Mode } from '@/types'
 
 /**
  * Validate if a value is a valid timebox value
