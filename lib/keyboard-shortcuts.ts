@@ -68,7 +68,11 @@ export function useKeyboardShortcut(
  * @param callback Function to call when Cmd/Ctrl+K is pressed
  */
 export function useCommandPaletteShortcut(callback: () => void) {
-  const isMac = typeof window !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform)
+  const [isMac, setIsMac] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsMac(/Mac|iPhone|iPad|iPod/.test(navigator.platform))
+  }, [])
 
   useKeyboardShortcut(
     (e) => {
