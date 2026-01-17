@@ -61,6 +61,43 @@ export default function Home() {
   const [showRightPanel, setShowRightPanel] = useState(true)
   const [stuckDismissed, setStuckDismissed] = useState(false)
 
+  // Quick Actions handlers
+  const handleClearInput = () => {
+    setInput('')
+    setOutput('')
+    setFullOutput('')
+    setTrace(null)
+  }
+
+  const handleExampleQuery = () => {
+    const examples = [
+      'Explain how React hooks work',
+      'What is the difference between let and const in JavaScript?',
+      'How does async/await work in JavaScript?',
+      'Explain the concept of closure in programming',
+    ]
+    const randomExample = examples[Math.floor(Math.random() * examples.length)]
+    setInput(randomExample)
+  }
+
+  const handleExportNotes = () => {
+    const notes = {
+      timestamp: new Date().toISOString(),
+      input,
+      output,
+      trace,
+      mode,
+      cognitiveLoad,
+    }
+    const blob = new Blob([JSON.stringify(notes, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `gyaanforge-notes-${Date.now()}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   // Load cognitive load preference from localStorage with validation
   useEffect(() => {
     try {
@@ -293,7 +330,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-950">
-      <Header />
+      <Header 
+        onClearInput={handleClearInput}
+        onExampleQuery={handleExampleQuery}
+        onExportNotes={handleExportNotes}
+      />
 
       {/* Control Bar - Organized by Category */}
       <div className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">

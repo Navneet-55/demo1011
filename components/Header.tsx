@@ -4,8 +4,15 @@ import React, { useState, useEffect } from 'react'
 import { useTheme } from './ThemeProvider'
 import { ModeToggle } from '@/components/ModeToggle'
 import { OnlineOfflineToggle } from './OnlineOfflineToggle'
+import { QuickActions } from '@/components/QuickActions'
 
-export function Header() {
+interface HeaderProps {
+  onClearInput?: () => void
+  onExampleQuery?: () => void
+  onExportNotes?: () => void
+}
+
+export function Header({ onClearInput, onExampleQuery, onExportNotes }: HeaderProps) {
   const { theme, toggleTheme } = useTheme()
 
   return (
@@ -29,6 +36,14 @@ export function Header() {
 
           {/* Right side controls */}
           <div className="flex items-center gap-3">
+            {/* Quick Actions Menu */}
+            <QuickActions
+              onClearInput={onClearInput}
+              onExampleQuery={onExampleQuery}
+              onToggleDarkMode={toggleTheme}
+              onExportNotes={onExportNotes}
+            />
+            
             {/* Online/Offline Toggle */}
             <OnlineOfflineToggle />
 
