@@ -9,6 +9,8 @@ import WhyThisAnswer from '@/components/WhyThisAnswer'
 import ImpactWidget from '@/components/ImpactWidget'
 import { KnowledgeGraphVisualizer } from '@/components/KnowledgeGraphVisualizer'
 import { ConceptExplorer } from '@/components/ConceptExplorer'
+import { ErrorDebugger } from '@/components/ErrorDebugger'
+import { ErrorInput } from '@/components/ErrorInput'
 import { useMode } from '@/components/ModeProvider'
 import { useOnlineOffline } from '@/contexts/OnlineOfflineContext'
 import { useKnowledgeGraph } from '@/contexts/KnowledgeGraphContext'
@@ -37,6 +39,7 @@ export default function Home() {
   const [currentIntent, setCurrentIntent] = useState<Intent>('general')
   const [showDevCopilot, setShowDevCopilot] = useState(false)
   const [showKnowledgeGraph, setShowKnowledgeGraph] = useState(true)
+  const [showErrorDebugger, setShowErrorDebugger] = useState(false)
   const [cognitiveLoad, setCognitiveLoad] = useState<CognitiveLoadMode>('balanced')
 
   // Load cognitive load preference from localStorage
@@ -257,6 +260,18 @@ export default function Home() {
             >
               {showKnowledgeGraph ? '🌐 Graph On' : '🌐 Graph Off'}
             </button>
+
+            {/* Error Debugger Toggle */}
+            <button
+              onClick={() => setShowErrorDebugger(!showErrorDebugger)}
+              className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
+                showErrorDebugger
+                  ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              {showErrorDebugger ? '🐛 Debugger On' : '🐛 Debugger Off'}
+            </button>
             
             <button
               onClick={() => setShowDevCopilot(!showDevCopilot)}
@@ -296,8 +311,14 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          /* Standard View with Knowledge Graph */
-          <div className={`grid ${showKnowledgeGraph ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1 lg:grid-cols-2'} gap-6 h-[calc(100vh-16rem)]`}>
+          /* Standard View with Knowledge Graph & Error Debugger */
+          <div className={`grid gap-6 h-[calc(100vh-16rem)]`} style={{
+            gridTemplateColumns: showKnowledgeGraph && showErrorDebugger 
+              ? '1fr 1fr 1fr' 
+              : showKnowledgeGraph || showErrorDebugger
+              ? '1fr 1fr'
+              : '1fr 1fr'
+          }}>
             <div className="flex flex-col">
               <InputPanel
                 mode={mode}
@@ -306,7 +327,15 @@ export default function Home() {
                 onSubmit={() => handleSubmit()}
                 isLoading={isLoading}
               />
+              
+              {/* Error Input Section */}
+              {showErrorDebugger && (
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <ErrorInput />
+                </div>
+              )}
             </div>
+            
             <div className="flex flex-col space-y-4" data-output-panel>
               <OutputPanel content={output} isLoading={isLoading} />
               
@@ -331,14 +360,24 @@ export default function Home() {
                 </div>
               )}
             </div>
-            {showKnowledgeGraph && (
+            
+            {/* Right Sidebar - Knowledge Graph or Error Debugger */}
+            {(showKnowledgeGraph || showErrorDebugger) && (
               <div className="flex flex-col gap-4 h-full">
-                <div className="flex-1 min-h-0">
-                  <KnowledgeGraphVisualizer />
-                </div>
-                <div className="h-64 min-h-0 overflow-hidden">
-                  <ConceptExplorer />
-                </div>
+                {showKnowledgeGraph ? (
+                  <>
+                    <div className="flex-1 min-h-0">
+                      <KnowledgeGraphVisualizer />
+                    </div>
+                    <div className="h-64 min-h-0 overflow-hidden">
+                      <ConceptExplorer />
+                    </div>
+                  </>
+                ) : showErrorDebugger ? (
+                  <div className="flex-1 min-h-0 overflow-hidden">
+                    <ErrorDebugger />
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
