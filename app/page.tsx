@@ -12,6 +12,8 @@ import { ConceptExplorer } from '@/components/ConceptExplorer'
 import { ErrorDebugger } from '@/components/ErrorDebugger'
 import { ErrorInput } from '@/components/ErrorInput'
 import { TimeboxControl } from '@/components/TimeboxControl'
+import { PerspectiveControl } from '@/components/PerspectiveControl'
+import { FutureYouToggle } from '@/components/FutureYouToggle'
 import { useMode } from '@/components/ModeProvider'
 import { useOnlineOffline } from '@/contexts/OnlineOfflineContext'
 import { useKnowledgeGraph } from '@/contexts/KnowledgeGraphContext'
@@ -338,6 +340,11 @@ export default function Home() {
               {/* Feature #4: Timebox Control */}
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <TimeboxControl />
+              </div>
+              
+              {/* Feature #5: Perspective Control */}
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <PerspectiveControl />
               </div>
               
               {/* Error Input Section */}
