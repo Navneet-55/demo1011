@@ -377,84 +377,123 @@ export default function Home() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {showDevCopilot ? (
           /* Dev Copilot View */
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-16rem)]">
-            <div className="flex flex-col">
-              <DevCopilot
-                mode={mode}
-                onSubmit={handleSubmit}
-                isLoading={isLoading}
-              />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-16rem)]">
+            {/* Left Panel - Dev Copilot Tools */}
+            <div className="flex flex-col bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+              <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <span>🚀</span>
+                  <span>Dev Copilot</span>
+                </h2>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <DevCopilot
+                  mode={mode}
+                  onSubmit={handleSubmit}
+                  isLoading={isLoading}
+                />
+              </div>
             </div>
-            <div className="flex flex-col space-y-4" data-output-panel>
-              <OutputPanel content={output} isLoading={isLoading} />
-              {trace && !isLoading && <WhyThisAnswer trace={trace} />}
-              {!output && !isLoading && (
-                <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-600">
-                  <div className="text-6xl mb-4">🚀</div>
-                  <p className="text-lg font-medium">Choose a tool and start coding!</p>
-                  <p className="text-sm mt-2">Dev Copilot is ready to assist</p>
-                </div>
-              )}
+            
+            {/* Right Panel - Output */}
+            <div className="flex flex-col bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden" data-output-panel>
+              <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Output</h2>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <OutputPanel content={output} isLoading={isLoading} />
+                {trace && !isLoading && <WhyThisAnswer trace={trace} />}
+                {!output && !isLoading && (
+                  <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-600 p-8">
+                    <div className="text-6xl mb-4">🚀</div>
+                    <p className="text-lg font-medium">Choose a tool and start coding!</p>
+                    <p className="text-sm mt-2">Dev Copilot is ready to assist</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ) : (
           /* Standard View with Learning Features */
           <div className={`grid gap-6 h-[calc(100vh-16rem)]`} style={{
             gridTemplateColumns: showRightPanel 
-              ? '1fr 1fr 1fr' 
+              ? '400px 1fr 400px' 
               : showKnowledgeGraph || showErrorDebugger
               ? '1fr 1fr'
               : '1fr 1fr'
           }}>
-            <div className="flex flex-col">
-              <InputPanel
-                mode={mode}
-                value={input}
-                onChange={setInput}
-                onSubmit={() => handleSubmit()}
-                isLoading={isLoading}
-              />
-              
-              {/* Feature #4: Timebox Control */}
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <TimeboxControl />
+            {/* Left Panel - Input & Controls */}
+            <div className="flex flex-col bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+              {/* Input Section */}
+              <div className="flex-shrink-0">
+                <InputPanel
+                  mode={mode}
+                  value={input}
+                  onChange={setInput}
+                  onSubmit={() => handleSubmit()}
+                  isLoading={isLoading}
+                />
               </div>
               
-              {/* Feature #5: Perspective Control */}
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <PerspectiveControl />
-              </div>
-              
-              {/* Feature #10: Future-You Toggle */}
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <FutureYouToggle />
-              </div>
-              
-              {/* Error Input Section */}
-              {showErrorDebugger && (
-                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <ErrorInput />
+              {/* Learning Controls Section */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="p-4 space-y-4">
+                  {/* Section Header */}
+                  <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-gray-700">
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Learning Controls</span>
+                  </div>
+                  
+                  {/* Timebox Control */}
+                  <div className="space-y-2">
+                    <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">⏱️ Time Management</h3>
+                    <TimeboxControl />
+                  </div>
+                  
+                  {/* Perspective Control */}
+                  <div className="space-y-2">
+                    <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">👁️ Perspective</h3>
+                    <PerspectiveControl />
+                  </div>
+                  
+                  {/* Future-You Toggle */}
+                  <div className="space-y-2">
+                    <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">🔮 Reflection</h3>
+                    <FutureYouToggle />
+                  </div>
+                  
+                  {/* Error Input Section */}
+                  {showErrorDebugger && (
+                    <div className="space-y-2">
+                      <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">🐛 Debug Input</h3>
+                      <ErrorInput />
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
             
-            <div className="flex flex-col space-y-4" data-output-panel>
-              <OutputPanel content={output} isLoading={isLoading} />
+            {/* Center Panel - Output & Explanation */}
+            <div className="flex flex-col bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden" data-output-panel>
+              {/* Output Content */}
+              <div className="flex-1 overflow-y-auto">
+                <OutputPanel content={output} isLoading={isLoading} />
+              </div>
               
               {/* Continue Button for Chunked Content */}
               {fullOutput && !isLoading && (
-                <div className="flex justify-center">
+                <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
                   <button
                     onClick={handleContinue}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-all shadow-lg"
+                    className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 transition-all shadow-lg"
                   >
                     Continue Reading →
                   </button>
                 </div>
               )}
               
+              {/* Empty State */}
               {!output && !isLoading && (
-                <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-600">
+                <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-600 p-8">
                   <div className="text-6xl mb-4">💡</div>
                   <p className="text-lg font-medium">Ready to learn something new?</p>
                   <p className="text-sm mt-2">Paste code or ask a question to get started</p>
@@ -462,60 +501,68 @@ export default function Home() {
               )}
             </div>
             
-            {/* Right Panel - Learning Features Tabs */}
+            {/* Right Panel - Learning Features */}
             {showRightPanel && (
-              <div className="flex flex-col h-full overflow-hidden">
-                <Tabs
-                  defaultTab="trace"
-                  tabs={[
-                    {
-                      id: 'trace',
-                      label: 'Trace',
-                      icon: '🔍',
-                      content: <TracePanel metadata={currentMetadata} />,
-                    },
-                    {
-                      id: 'practice',
-                      label: 'Practice',
-                      icon: '🎯',
-                      content: <PracticePanel metadata={currentMetadata} />,
-                    },
-                    {
-                      id: 'quiz',
-                      label: 'Quiz',
-                      icon: '🎓',
-                      content: (
-                        <QuizFlow
-                          metadata={currentMetadata}
-                          onGenerateQuiz={() => {
-                            // TODO: Trigger quiz generation
-                          }}
-                        />
-                      ),
-                    },
-                    {
-                      id: 'graph',
-                      label: 'Graph',
-                      icon: '🌐',
-                      content: (
-                        <>
-                          <div className="flex-1 min-h-0 mb-4">
-                            <KnowledgeGraphVisualizer />
-                          </div>
-                          <div className="h-64 min-h-0">
-                            <ConceptExplorer />
-                          </div>
-                        </>
-                      ),
-                    },
-                    {
-                      id: 'debug',
-                      label: 'Debug',
-                      icon: '🐛',
-                      content: <ErrorDebugger />,
-                    },
-                  ]}
-                />
+              <div className="flex flex-col bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+                {/* Panel Header */}
+                <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                  <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Learning Tools</h2>
+                </div>
+                
+                {/* Tabs Content */}
+                <div className="flex-1 overflow-hidden">
+                  <Tabs
+                    defaultTab="trace"
+                    tabs={[
+                      {
+                        id: 'trace',
+                        label: 'Trace',
+                        icon: '🔍',
+                        content: <TracePanel metadata={currentMetadata} />,
+                      },
+                      {
+                        id: 'practice',
+                        label: 'Practice',
+                        icon: '🎯',
+                        content: <PracticePanel metadata={currentMetadata} />,
+                      },
+                      {
+                        id: 'quiz',
+                        label: 'Quiz',
+                        icon: '🎓',
+                        content: (
+                          <QuizFlow
+                            metadata={currentMetadata}
+                            onGenerateQuiz={() => {
+                              // TODO: Trigger quiz generation
+                            }}
+                          />
+                        ),
+                      },
+                      {
+                        id: 'graph',
+                        label: 'Graph',
+                        icon: '🌐',
+                        content: (
+                          <>
+                            <div className="flex-1 min-h-0 mb-4">
+                              <KnowledgeGraphVisualizer />
+                            </div>
+                            <div className="h-64 min-h-0">
+                              <ConceptExplorer />
+                            </div>
+                          </>
+                        ),
+                      },
+                      {
+                        id: 'debug',
+                        label: 'Debug',
+                        icon: '🐛',
+                        content: <ErrorDebugger />,
+                      },
+                    ]}
+                  />
+                </div>
               </div>
             )}
           </div>
