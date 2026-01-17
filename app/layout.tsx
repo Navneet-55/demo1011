@@ -3,6 +3,7 @@ import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { ModeProvider } from '@/components/ModeProvider'
 import { OnlineOfflineProvider } from '@/contexts/OnlineOfflineContext'
+import { KnowledgeGraphProvider } from '@/contexts/KnowledgeGraphContext'
 
 export const metadata: Metadata = {
   title: 'GyaanForge - AI-Powered Learning Platform',
@@ -20,7 +21,9 @@ export default function RootLayout({
         <ThemeProvider>
           <ModeProvider>
             <OnlineOfflineProvider>
-              {children}
+              <KnowledgeGraphProvider>
+                {children}
+              </KnowledgeGraphProvider>
             </OnlineOfflineProvider>
           </ModeProvider>
         </ThemeProvider>
