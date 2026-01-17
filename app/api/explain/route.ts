@@ -137,7 +137,7 @@ const getExplanation = async (input: string, mode: Mode, forceOffline: boolean =
   // Try Gemini if API key is available and not forcing offline
   if (!forceOffline && genAI) {
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
       const prompt = `${systemPrompts[mode]}\n\nUser question:\n${input}`
       
       const result = await model.generateContentStream(prompt)
