@@ -6,10 +6,28 @@ import { extractConceptsFromText } from '@/lib/conceptExtractor'
 import { ExplanationTrace, Mode, Intent, ResponseMetadata, Timebox, Perspective } from '@/types'
 import { createResponseMetadata } from '@/types/api-contract'
 
+// Debug mode
+const DEBUG = process.env.NODE_ENV === 'development'
+
 // Initialize Groq (will be null if API key not provided)
 const groq = process.env.GROQ_API_KEY 
   ? new Groq({ apiKey: process.env.GROQ_API_KEY })
   : null
+
+// Validate mode
+function isValidMode(mode: unknown): mode is Mode {
+  return typeof mode === 'string' && ['Beginner', 'Student', 'Pro'].includes(mode)
+}
+
+// Validate timebox
+function isValidTimebox(timebox: unknown): timebox is Timebox {
+  return typeof timebox === 'string' && ['30s', '2m', 'deep'].includes(timebox)
+}
+
+// Validate perspective
+function isValidPerspective(perspective: unknown): perspective is Perspective {
+  return typeof perspective === 'string' && ['story', 'diagram', 'code', 'analogy', 'math'].includes(perspective)
+}
 
 const systemPrompts: Record<Mode, string> = {
   Beginner: `You are GyaanForge, an expert AI mentor that forges deep understanding from code.
