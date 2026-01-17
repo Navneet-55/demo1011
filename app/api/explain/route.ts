@@ -5,28 +5,30 @@ import { guardrails } from '@/lib/guardrails'
 import { extractConceptsFromText } from '@/lib/conceptExtractor'
 import { ExplanationTrace, Mode, Intent, ResponseMetadata, Timebox, Perspective } from '@/types'
 import { createResponseMetadata } from '@/types/api-contract'
+import { DEBUG_CONFIG, LEARNING_CONSTANTS } from '@/lib/constants'
+import { sanitizeString } from '@/lib/validators'
 
 // Debug mode
-const DEBUG = process.env.NODE_ENV === 'development'
+const DEBUG = DEBUG_CONFIG.LOG_API_CALLS
 
 // Initialize Groq (will be null if API key not provided)
 const groq = process.env.GROQ_API_KEY 
   ? new Groq({ apiKey: process.env.GROQ_API_KEY })
   : null
 
-// Validate mode
+// Validate mode using constants
 function isValidMode(mode: unknown): mode is Mode {
-  return typeof mode === 'string' && ['Beginner', 'Student', 'Pro'].includes(mode)
+  return typeof mode === 'string' && LEARNING_CONSTANTS.MODES.includes(mode as any)
 }
 
-// Validate timebox
+// Validate timebox using constants
 function isValidTimebox(timebox: unknown): timebox is Timebox {
-  return typeof timebox === 'string' && ['30s', '2m', 'deep'].includes(timebox)
+  return typeof timebox === 'string' && LEARNING_CONSTANTS.TIMEBOX_VALUES.includes(timebox as any)
 }
 
-// Validate perspective
+// Validate perspective using constants
 function isValidPerspective(perspective: unknown): perspective is Perspective {
-  return typeof perspective === 'string' && ['story', 'diagram', 'code', 'analogy', 'math'].includes(perspective)
+  return typeof perspective === 'string' && LEARNING_CONSTANTS.PERSPECTIVES.includes(perspective as any)
 }
 
 const systemPrompts: Record<Mode, string> = {

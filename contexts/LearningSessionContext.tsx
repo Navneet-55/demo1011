@@ -17,9 +17,16 @@ import {
 } from '@/types/learning-features'
 import { Timebox, Perspective } from '@/types/api-contract'
 import { getStorageItem, setStorageItem } from '@/lib/storage-wrapper'
+import { DEBUG_CONFIG, LEARNING_CONSTANTS, ERROR_MESSAGES } from '@/lib/constants'
+import { 
+  isValidTimebox, 
+  isValidPerspective, 
+  isValidScore,
+  ValidationError
+} from '@/lib/validators'
 
 // Debug mode for development
-const DEBUG = process.env.NODE_ENV === 'development'
+const DEBUG = DEBUG_CONFIG.LOG_ACTIONS
 
 // ============ CONTEXT ============
 
@@ -40,18 +47,42 @@ interface LearningSessionContextType {
 
 const LearningSessionContext = createContext<LearningSessionContextType | null>(null)
 
-// Validate action payload types
+// Validate action payload types with enhanced type guards
 function validateAction(action: Action): boolean {
   try {
     switch (action.type) {
       case 'SET_TIMEBOX':
-        return ['30s', '2m', 'deep'].includes(action.payload)
+        if (!isValidTimebox(action.payload)) {
+          DEBUG && console.warn(
+            `Invalid timebox: ${action.payload}. Valid values: ${LEARNING_CONSTANTS.TIMEBOX_VALUES.join(', ')}`
+          )
+          return false
+        }
+        return true
+
       case 'SET_PERSPECTIVE':
-        return ['story', 'diagram', 'code', 'analogy', 'math'].includes(action.payload)
+        if (!isValidPerspective(action.payload)) {
+          DEBUG && console.warn(
+            `Invalid perspective: ${action.payload}. Valid values: ${LEARNING_CONSTANTS.PERSPECTIVES.join(', ')}`
+          )
+          return false
+        }
+        return true
+
       case 'SET_FUTURE_YOU':
-        return typeof action.payload === 'boolean'
+        if (typeof action.payload !== 'boolean') {
+          DEBUG && console.warn('SET_FUTURE_YOU payload must be boolean')
+          return false
+        }
+        return true
+
       case 'SET_STUCK_SCORE':
-        return typeof action.payload === 'number' && action.payload >= 0 && action.payload <= 100
+        if (!isValidScore(action.payload)) {
+          DEBUG && console.warn(`SET_STUCK_SCORE payload must be between 0-100, got: ${action.payload}`)
+          return false
+        }
+        return true
+
       default:
         return true
     }
@@ -247,7 +278,11 @@ export function LearningSessionProvider({ children }: LearningSessionProviderPro
 export function useLearningSession(): LearningSessionContextType {
   const ctx = useContext(LearningSessionContext)
   if (!ctx) {
-    throw new Error('useLearningSession must be used within LearningSessionProvider')
+    const errorMsg = ERROR_MESSAGES.CONTEXT_NOT_FOUND('useLearningSession')
+    throw new ValidationError('CONTEXT_NOT_FOUND', errorMsg, {
+      context: 'LearningSessionContext',
+      hint: 'Ensure LearningSessionProvider wraps your component'
+    })
   }
   return ctx
 }

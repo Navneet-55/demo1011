@@ -29,14 +29,16 @@ import { parseStreamedResponse } from '@/lib/meta-parsing'
 import { safeParseMeta } from '@/lib/meta-validation'
 import { generateFallbackMetadata } from '@/lib/meta-fallback'
 import { analyzeStuckState } from '@/lib/stuckDetector'
+import { COGNITIVE_LOAD_CONFIG, STORAGE_KEYS, DEBUG_CONFIG } from '@/lib/constants'
+import { sanitizeString } from '@/lib/validators'
 
 export const dynamic = 'force-dynamic'
 
-const COGNITIVE_LOAD_CONFIG = {
-  overwhelmed: { chunkSize: 150, delay: 100, label: '🧘 Overwhelmed' },
-  balanced: { chunkSize: 300, delay: 50, label: '⚖️ Balanced' },
-  speed: { chunkSize: 600, delay: 20, label: '⚡ Speed' },
-  mastery: { chunkSize: 0, delay: 0, label: '🎓 Mastery' },
+// Debug logger utility
+const debugLog = (message: string, data?: any) => {
+  if (DEBUG_CONFIG.LOG_STATE_CHANGES) {
+    console.log(`[GyaanForge] ${message}`, data || '')
+  }
 }
 
 export default function Home() {
@@ -59,18 +61,30 @@ export default function Home() {
   const [showRightPanel, setShowRightPanel] = useState(true)
   const [stuckDismissed, setStuckDismissed] = useState(false)
 
-  // Load cognitive load preference from localStorage
+  // Load cognitive load preference from localStorage with validation
   useEffect(() => {
-    const saved = localStorage.getItem('cognitiveLoad')
-    if (saved && ['overwhelmed', 'balanced', 'speed', 'mastery'].includes(saved)) {
-      setCognitiveLoad(saved as CognitiveLoadMode)
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.COGNITIVE_LOAD)
+      if (saved && ['overwhelmed', 'balanced', 'speed', 'mastery'].includes(saved)) {
+        setCognitiveLoad(saved as CognitiveLoadMode)
+        debugLog('Loaded cognitive load preference', { saved })
+      }
+    } catch (error) {
+      debugLog('Error loading cognitive load preference', error)
     }
   }, [])
 
-  // Save cognitive load preference to localStorage
+  // Save cognitive load preference to localStorage with error handling
   const handleCognitiveLoadChange = (mode: CognitiveLoadMode) => {
-    setCognitiveLoad(mode)
-    localStorage.setItem('cognitiveLoad', mode)
+    try {
+      setCognitiveLoad(mode)
+      localStorage.setItem(STORAGE_KEYS.COGNITIVE_LOAD, mode)
+      debugLog('Saved cognitive load preference', { mode })
+    } catch (error) {
+      debugLog('Error saving cognitive load preference', error)
+      // Silently fail - still update state even if storage fails
+      setCognitiveLoad(mode)
+    }
   }
 
   const handleSubmit = async (
