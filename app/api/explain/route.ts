@@ -1,6 +1,5 @@
 import { OpenAI } from 'openai'
-import { OpenAIStream, StreamingTextResponse } from 'ai'
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -65,7 +64,7 @@ export async function POST(req: NextRequest) {
     const { input, mode } = await req.json()
 
     if (!input || !mode) {
-      return new Response('Missing required fields', { status: 400 })
+      return new NextResponse('Missing required fields', { status: 400 })
     }
 
     const response = await openai.chat.completions.create({
@@ -85,10 +84,29 @@ export async function POST(req: NextRequest) {
       max_tokens: 2000,
     })
 
-    const stream = OpenAIStream(response)
-    return new StreamingTextResponse(stream)
+    // Create a readable stream from the OpenAI response
+    const encoder = new TextEncoder()
+    const customReadable = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of response) {
+          const text = chunk.choices[0]?.delta?.content || ''
+          if (text) {
+            controller.enqueue(encoder.encode(text))
+          }
+        }
+        controller.close()
+      },
+    })
+
+    return new NextResponse(customReadable, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    })
   } catch (error) {
     console.error('API Error:', error)
-    return new Response('Internal Server Error', { status: 500 })
+    return new NextResponse('Internal Server Error', { status: 500 })
   }
 }

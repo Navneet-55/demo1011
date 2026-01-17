@@ -1,7 +1,7 @@
 'use client'
 
 import { useTheme } from './ThemeProvider'
-import { useMode, Mode } from './ModeProvider'
+import { useMode } from './ModeProvider'
 import { ModeToggle } from './ModeToggle'
 
 export function Header() {
