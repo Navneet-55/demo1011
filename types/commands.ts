@@ -30,8 +30,8 @@ export interface Command {
   shortcut?: string
   /** If true, shows submenu with these commands */
   subcommands?: Command[]
-  /** Handler function that executes the command */
-  handler: (context: CommandContext) => Promise<void> | void
+  /** Handler function that executes the command (optional if has subcommands) */
+  handler?: (context: CommandContext) => Promise<void> | void
   /** Shown in list if no handler result */
   details?: string
 }

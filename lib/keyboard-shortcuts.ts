@@ -3,7 +3,7 @@
  * Provides hooks and utilities for handling global keyboard shortcuts
  */
 
-import { useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 interface UseKeyboardShortcutOptions {
   ctrlKey?: boolean
@@ -163,10 +163,10 @@ export function formatShortcut(options: UseKeyboardShortcutOptions): string {
  * Detect if command/ctrl key is pressed (for icon indication)
  */
 export function useCommandKeyPressed() {
-  const [isPressed, setIsPressed] = useRef(false).current
+  const [isPressed, setIsPressed] = React.useState(false)
   const isMac = typeof window !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform)
 
-  useEffect(() => {
+  React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((isMac && e.metaKey) || (!isMac && e.ctrlKey)) {
         setIsPressed(true)
@@ -184,7 +184,7 @@ export function useCommandKeyPressed() {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [isMac, setIsPressed])
+  }, [isMac])
 
   return isPressed
 }
