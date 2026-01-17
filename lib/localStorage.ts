@@ -121,6 +121,7 @@ export const storageUtils = {
         debug: intentBreakdown.debug || 0,
         docs: intentBreakdown.docs || 0,
         summarize: intentBreakdown.summarize || 0,
+        practice: intentBreakdown.practice || 0,
         test: intentBreakdown.test || 0,
         general: intentBreakdown.general || 0
       }
