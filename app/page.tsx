@@ -303,65 +303,73 @@ export default function Home() {
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-950">
       <Header onCommandPaletteOpen={() => setIsPaletteOpen(true)} />
 
-      {/* Mode Toggle */}
-      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            GyaanForge
-          </h1>
-          <div className="flex gap-3 items-center">
-            {/* Cognitive Load Selector */}
-            <div className="flex gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-              {(Object.keys(COGNITIVE_LOAD_CONFIG) as CognitiveLoadMode[]).map((loadMode) => (
-                <button
-                  key={loadMode}
-                  onClick={() => handleCognitiveLoadChange(loadMode)}
-                  className={`px-3 py-1.5 rounded text-sm font-medium transition-all ${
-                    cognitiveLoad === loadMode
-                      ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                  title={COGNITIVE_LOAD_CONFIG[loadMode].label}
-                >
-                  {COGNITIVE_LOAD_CONFIG[loadMode].label}
-                </button>
-              ))}
+      {/* Control Bar - Organized by Category */}
+      <div className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
+        <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center sm:justify-between">
+            {/* Learning Mode */}
+            <div className="flex flex-col gap-2">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Cognitive Load</p>
+              <div className="flex gap-2 bg-white dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700">
+                {(Object.keys(COGNITIVE_LOAD_CONFIG) as CognitiveLoadMode[]).map((loadMode) => (
+                  <button
+                    key={loadMode}
+                    onClick={() => handleCognitiveLoadChange(loadMode)}
+                    className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+                      cognitiveLoad === loadMode
+                        ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 shadow-sm'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                    }`}
+                    title={COGNITIVE_LOAD_CONFIG[loadMode].label}
+                  >
+                    {COGNITIVE_LOAD_CONFIG[loadMode].label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Knowledge Graph Toggle */}
-            <button
-              onClick={() => setShowKnowledgeGraph(!showKnowledgeGraph)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
-                showKnowledgeGraph
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-              }`}
-            >
-              {showKnowledgeGraph ? '🌐 Graph On' : '🌐 Graph Off'}
-            </button>
+            {/* Features */}
+            <div className="flex flex-col gap-2">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Features</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowKnowledgeGraph(!showKnowledgeGraph)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${
+                    showKnowledgeGraph
+                      ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                  }`}
+                >
+                  🌐 Graph
+                </button>
 
-            {/* Error Debugger Toggle */}
-            <button
-              onClick={() => setShowErrorDebugger(!showErrorDebugger)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
-                showErrorDebugger
-                  ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-              }`}
-            >
-              {showErrorDebugger ? '🐛 Debugger On' : '🐛 Debugger Off'}
-            </button>
-            
-            <button
-              onClick={() => setShowDevCopilot(!showDevCopilot)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                showDevCopilot
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-              }`}
-            >
-              {showDevCopilot ? '📝 Standard Mode' : '🚀 Dev Copilot Mode'}
-            </button>
+                <button
+                  onClick={() => setShowErrorDebugger(!showErrorDebugger)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${
+                    showErrorDebugger
+                      ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                  }`}
+                >
+                  🐛 Debug
+                </button>
+              </div>
+            </div>
+
+            {/* Views */}
+            <div className="flex flex-col gap-2">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">View</p>
+              <button
+                onClick={() => setShowDevCopilot(!showDevCopilot)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${
+                  showDevCopilot
+                    ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                }`}
+              >
+                {showDevCopilot ? '🚀 Dev Mode' : '📚 Learning'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
