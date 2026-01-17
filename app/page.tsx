@@ -14,12 +14,21 @@ import { ErrorInput } from '@/components/ErrorInput'
 import { TimeboxControl } from '@/components/TimeboxControl'
 import { PerspectiveControl } from '@/components/PerspectiveControl'
 import { FutureYouToggle } from '@/components/FutureYouToggle'
+import { TracePanel } from '@/components/TracePanel'
+import { PracticePanel } from '@/components/PracticePanel'
+import { QuizFlow } from '@/components/QuizFlow'
+import { StuckInterventionBanner } from '@/components/StuckInterventionBanner'
+import { Tabs } from '@/components/ui/index'
 import { useMode } from '@/components/ModeProvider'
 import { useOnlineOffline } from '@/contexts/OnlineOfflineContext'
 import { useKnowledgeGraph } from '@/contexts/KnowledgeGraphContext'
 import { useLearningSession } from '@/contexts/LearningSessionContext'
-import { ExplanationTrace, ImpactMetrics, Intent, CognitiveLoadMode } from '@/types'
+import { ExplanationTrace, ImpactMetrics, Intent, CognitiveLoadMode, ResponseMetadata } from '@/types'
 import { storageUtils } from '@/lib/localStorage'
+import { parseStreamedResponse } from '@/lib/meta-parsing'
+import { safeParseMeta } from '@/lib/meta-validation'
+import { generateFallbackMetadata } from '@/lib/meta-fallback'
+import { analyzeStuckState } from '@/lib/stuckDetector'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,6 +55,9 @@ export default function Home() {
   const [showKnowledgeGraph, setShowKnowledgeGraph] = useState(true)
   const [showErrorDebugger, setShowErrorDebugger] = useState(false)
   const [cognitiveLoad, setCognitiveLoad] = useState<CognitiveLoadMode>('balanced')
+  const [currentMetadata, setCurrentMetadata] = useState<ResponseMetadata | null>(null)
+  const [showRightPanel, setShowRightPanel] = useState(true)
+  const [stuckDismissed, setStuckDismissed] = useState(false)
 
   // Load cognitive load preference from localStorage
   useEffect(() => {
@@ -119,6 +131,7 @@ export default function Home() {
       if (reader) {
         let accumulatedText = ''
         let traceExtracted = false
+        let metaExtracted = false
 
         while (true) {
           const { done, value } = await reader.read()
@@ -128,8 +141,23 @@ export default function Home() {
           const chunk = decoder.decode(value, { stream: true })
           accumulatedText += chunk
 
-          // Extract trace if present
-          if (!traceExtracted && accumulatedText.includes('__TRACE__')) {
+          // Extract new metadata format __META__
+          if (!metaExtracted && accumulatedText.includes('__META__')) {
+            const parsed = parseStreamedResponse(accumulatedText)
+            if (parsed.metadata) {
+              const validated = safeParseMeta(parsed.metadata)
+              if (validated) {
+                setCurrentMetadata(validated)
+                setTrace(validated.trace as any) // For backwards compat
+                setCurrentIntent(validated.trace.intent)
+                metaExtracted = true
+              }
+            }
+            accumulatedText = parsed.content
+          }
+
+          // Extract legacy trace if present (backwards compatibility)
+          if (!traceExtracted && !metaExtracted && accumulatedText.includes('__TRACE__')) {
             const traceMatch = accumulatedText.match(
               /__TRACE__(.+?)__TRACE__/
             )
@@ -320,9 +348,9 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          /* Standard View with Knowledge Graph & Error Debugger */
+          /* Standard View with Learning Features */
           <div className={`grid gap-6 h-[calc(100vh-16rem)]`} style={{
-            gridTemplateColumns: showKnowledgeGraph && showErrorDebugger 
+            gridTemplateColumns: showRightPanel 
               ? '1fr 1fr 1fr' 
               : showKnowledgeGraph || showErrorDebugger
               ? '1fr 1fr'
@@ -375,7 +403,6 @@ export default function Home() {
                 </div>
               )}
               
-              {trace && !isLoading && <WhyThisAnswer trace={trace} />}
               {!output && !isLoading && (
                 <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-600">
                   <div className="text-6xl mb-4">💡</div>
@@ -385,23 +412,60 @@ export default function Home() {
               )}
             </div>
             
-            {/* Right Sidebar - Knowledge Graph or Error Debugger */}
-            {(showKnowledgeGraph || showErrorDebugger) && (
-              <div className="flex flex-col gap-4 h-full">
-                {showKnowledgeGraph ? (
-                  <>
-                    <div className="flex-1 min-h-0">
-                      <KnowledgeGraphVisualizer />
-                    </div>
-                    <div className="h-64 min-h-0 overflow-hidden">
-                      <ConceptExplorer />
-                    </div>
-                  </>
-                ) : showErrorDebugger ? (
-                  <div className="flex-1 min-h-0 overflow-hidden">
-                    <ErrorDebugger />
-                  </div>
-                ) : null}
+            {/* Right Panel - Learning Features Tabs */}
+            {showRightPanel && (
+              <div className="flex flex-col h-full overflow-hidden">
+                <Tabs
+                  defaultTab="trace"
+                  tabs={[
+                    {
+                      id: 'trace',
+                      label: 'Trace',
+                      icon: '🔍',
+                      content: <TracePanel metadata={currentMetadata} />,
+                    },
+                    {
+                      id: 'practice',
+                      label: 'Practice',
+                      icon: '🎯',
+                      content: <PracticePanel metadata={currentMetadata} />,
+                    },
+                    {
+                      id: 'quiz',
+                      label: 'Quiz',
+                      icon: '🎓',
+                      content: (
+                        <QuizFlow
+                          metadata={currentMetadata}
+                          onGenerateQuiz={() => {
+                            // TODO: Trigger quiz generation
+                          }}
+                        />
+                      ),
+                    },
+                    {
+                      id: 'graph',
+                      label: 'Graph',
+                      icon: '🌐',
+                      content: (
+                        <>
+                          <div className="flex-1 min-h-0 mb-4">
+                            <KnowledgeGraphVisualizer />
+                          </div>
+                          <div className="h-64 min-h-0">
+                            <ConceptExplorer />
+                          </div>
+                        </>
+                      ),
+                    },
+                    {
+                      id: 'debug',
+                      label: 'Debug',
+                      icon: '🐛',
+                      content: <ErrorDebugger />,
+                    },
+                  ]}
+                />
               </div>
             )}
           </div>
