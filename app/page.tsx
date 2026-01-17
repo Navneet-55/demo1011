@@ -112,9 +112,18 @@ export default function Home() {
           setOutput(accumulatedText)
         }
       }
+      
+      // Scroll to output panel after response completes
+      if (typeof window !== 'undefined') {
+        const outputPanel = document.querySelector('[data-output-panel]')
+        outputPanel?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }
     } catch (error) {
       console.error('Error:', error)
-      setOutput('Sorry, something went wrong. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      setOutput(
+        `**❌ Oops! Something went wrong.**\n\n${errorMessage}\n\n*Please try again or check your connection.*`
+      )
     } finally {
       setIsLoading(false)
     }
@@ -163,9 +172,16 @@ export default function Home() {
                 isLoading={isLoading}
               />
             </div>
-            <div className="flex flex-col space-y-4">
+            <div className="flex flex-col space-y-4" data-output-panel>
               <OutputPanel content={output} isLoading={isLoading} />
-              {trace && <WhyThisAnswer trace={trace} />}
+              {trace && !isLoading && <WhyThisAnswer trace={trace} />}
+              {!output && !isLoading && (
+                <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-600">
+                  <div className="text-6xl mb-4">🚀</div>
+                  <p className="text-lg font-medium">Choose a tool and start coding!</p>
+                  <p className="text-sm mt-2">Dev Copilot is ready to assist</p>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -180,9 +196,16 @@ export default function Home() {
                 isLoading={isLoading}
               />
             </div>
-            <div className="flex flex-col space-y-4">
+            <div className="flex flex-col space-y-4" data-output-panel>
               <OutputPanel content={output} isLoading={isLoading} />
-              {trace && <WhyThisAnswer trace={trace} />}
+              {trace && !isLoading && <WhyThisAnswer trace={trace} />}
+              {!output && !isLoading && (
+                <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-600">
+                  <div className="text-6xl mb-4">💡</div>
+                  <p className="text-lg font-medium">Ready to learn something new?</p>
+                  <p className="text-sm mt-2">Paste code or ask a question to get started</p>
+                </div>
+              )}
             </div>
           </div>
         )}

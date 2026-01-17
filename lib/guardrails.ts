@@ -11,6 +11,9 @@ export interface UncertaintyCheck {
   verificationSteps?: string[]
 }
 
+// Cache for intent detection to improve performance
+const intentCache = new Map<string, Intent>()
+
 export const guardrails = {
   /**
    * Detects if input is ambiguous and generates clarifying questions
@@ -149,46 +152,60 @@ ${basePrompt}
   },
 
   /**
-   * Detects intent from user input
+   * Detects intent from user input (with caching for performance)
    */
   detectIntent(input: string): Intent {
+    // Check cache first
+    const cached = intentCache.get(input)
+    if (cached) return cached
+
     const trimmed = input.trim().toLowerCase()
+
+    let detectedIntent: Intent
 
     // Debug patterns
     if (
       /error|exception|bug|crash|fail|broken|doesn't work|not working/i.test(input) ||
       /traceback|stacktrace|at\s+\w+\.\w+|line\s+\d+/i.test(input)
     ) {
-      return 'debug'
+      detectedIntent = 'debug'
     }
-
     // Test generation
-    if (
+    else if (
       /test|unit test|integration test|mock|stub|spec/i.test(input) ||
       trimmed.startsWith('generate test') ||
       trimmed.includes('write test')
     ) {
-      return 'test'
+      detectedIntent = 'test'
     }
-
     // Documentation
-    if (
+    else if (
       /what is|what does|explain|how does|documentation|docs/i.test(input) ||
       /definition|meaning|purpose/i.test(input)
     ) {
-      return 'learn'
+      detectedIntent = 'learn'
     }
-
     // Summarization
-    if (/summarize|summary|tldr|brief|quick overview/i.test(input)) {
-      return 'summarize'
+    else if (/summarize|summary|tldr|brief|quick overview/i.test(input)) {
+      detectedIntent = 'summarize'
     }
-
     // Documentation lookup
-    if (/api|method|function|class.*do|parameter|argument/i.test(input)) {
-      return 'docs'
+    else if (/api|method|function|class.*do|parameter|argument/i.test(input)) {
+      detectedIntent = 'docs'
+    }
+    else {
+      detectedIntent = 'general'
     }
 
-    return 'general'
+    // Cache the result (with size limit to prevent memory leaks)
+    if (intentCache.size > 1000) {
+      const firstKey = intentCache.keys().next().value
+      if (firstKey !== undefined) {
+        intentCache.delete(firstKey)
+      }
+    }
+    intentCache.set(input, detectedIntent)
+
+    return detectedIntent
   }
 }

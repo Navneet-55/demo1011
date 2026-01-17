@@ -6,8 +6,8 @@ import { storageUtils } from '@/lib/localStorage'
 
 interface ImpactWidgetProps {
   onSave: (metrics: Omit<ImpactMetrics, 'id' | 'timestamp'>) => void
-  mode: any
-  intent: any
+  mode: ImpactMetrics['mode']
+  intent: ImpactMetrics['intent']
 }
 
 export default function ImpactWidget({ onSave, mode, intent }: ImpactWidgetProps) {
@@ -36,10 +36,11 @@ export default function ImpactWidget({ onSave, mode, intent }: ImpactWidgetProps
     }
     onSave(metrics)
     setIsOpen(false)
-    // Reset for next time
+    // Reset for next time with optimistic defaults
     setConfidenceBefore(50)
-    setConfidenceAfter(confidenceBefore + 20) // Optimistic default
+    setConfidenceAfter(70) // Optimistic default
     setClarityRating(3)
+    setTimeSaved(10)
   }
 
   if (showSummary && summary) {

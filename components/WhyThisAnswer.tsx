@@ -36,10 +36,12 @@ export default function WhyThisAnswer({ trace }: WhyThisAnswerProps) {
   const intentInfo = formatIntent(trace.intent)
 
   return (
-    <div className="mt-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
+    <div className="mt-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 shadow-sm hover:shadow-md transition-shadow">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors rounded-lg"
+        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+        aria-expanded={isExpanded}
+        aria-label="Toggle explanation details"
       >
         <div className="flex items-center gap-2">
           <span className="text-lg">🔍</span>
@@ -58,7 +60,7 @@ export default function WhyThisAnswer({ trace }: WhyThisAnswerProps) {
       </button>
 
       {isExpanded && (
-        <div className="px-4 pb-4 space-y-3 text-sm">
+        <div className="px-4 pb-4 space-y-3 text-sm animate-in fade-in slide-in-from-top-2 duration-200">
           {/* Mode */}
           <div className="flex items-center gap-2">
             <span className="text-gray-600 dark:text-gray-400 font-medium min-w-32">

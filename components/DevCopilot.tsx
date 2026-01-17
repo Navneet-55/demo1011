@@ -18,16 +18,24 @@ export default function DevCopilot({ mode, onSubmit, isLoading }: DevCopilotProp
   const [framework, setFramework] = useState('Jest')
 
   const handleSubmit = () => {
-    if (!input.trim()) return
+    if (!input.trim() || isLoading) return
 
     const toolIdMap = {
       explain: 'explain-code',
       debug: 'debug-error',
       test: 'generate-tests'
-    }
+    } as const
 
     const context = activeTab === 'test' ? { language, framework } : undefined
     onSubmit(input, toolIdMap[activeTab], context)
+    setInput('') // Clear input after submit
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault()
+      handleSubmit()
+    }
   }
 
   const tabs = [
@@ -120,9 +128,11 @@ export default function DevCopilot({ mode, onSubmit, isLoading }: DevCopilotProp
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder={placeholders[activeTab]}
             className="w-full h-64 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
             disabled={isLoading}
+            aria-label={`${tabs.find(t => t.id === activeTab)?.label} input`}
           />
         </div>
 
@@ -171,6 +181,7 @@ export default function DevCopilot({ mode, onSubmit, isLoading }: DevCopilotProp
               <div>• Select your language and testing framework</div>
             </>
           )}
+          <div className="pt-1 border-t border-gray-300 dark:border-gray-600 mt-2">⌨️ Press <kbd className="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs">Cmd/Ctrl+Enter</kbd> to submit</div>
         </div>
       </div>
     </div>

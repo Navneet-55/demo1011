@@ -10,9 +10,22 @@ export const storageUtils = {
     try {
       const existing = this.getAllMetrics()
       existing.push(metric)
-      localStorage.setItem(METRICS_KEY, JSON.stringify(existing))
+      // Limit to last 1000 metrics to prevent storage overflow
+      const limited = existing.slice(-1000)
+      localStorage.setItem(METRICS_KEY, JSON.stringify(limited))
     } catch (error) {
       console.error('Failed to save metric:', error)
+      // If quota exceeded, try clearing old metrics
+      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+        try {
+          const existing = this.getAllMetrics()
+          const recent = existing.slice(-100) // Keep only last 100
+          recent.push(metric)
+          localStorage.setItem(METRICS_KEY, JSON.stringify(recent))
+        } catch (retryError) {
+          console.error('Failed to save metric even after cleanup:', retryError)
+        }
+      }
     }
   },
 
