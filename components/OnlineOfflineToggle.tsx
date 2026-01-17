@@ -17,7 +17,7 @@ export function OnlineOfflineToggle() {
           }`}
           title={
             effectiveMode === 'online'
-              ? 'Using Groq API'
+              ? 'Using Groq Llama 3.3 70B'
               : 'Using Offline Mode'
           }
         />

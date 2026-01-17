@@ -166,7 +166,7 @@ const getExplanation = async (input: string, mode: Mode, forceOffline: boolean =
       const prompt = `${systemPrompts[mode]}\n\nUser question:\n${input}`
       
       const stream = await groq.chat.completions.create({
-        model: 'llama-3.1-70b-versatile',
+        model: 'llama-3.3-70b-versatile',
         messages: [{ role: 'user', content: prompt }],
         stream: true,
         temperature: 0.7,
