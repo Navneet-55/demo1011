@@ -168,7 +168,11 @@ export function formatShortcut(options: UseKeyboardShortcutOptions): string {
  */
 export function useCommandKeyPressed() {
   const [isPressed, setIsPressed] = React.useState(false)
-  const isMac = typeof window !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform)
+  const [isMac, setIsMac] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsMac(/Mac|iPhone|iPad|iPod/.test(navigator.platform))
+  }, [])
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
