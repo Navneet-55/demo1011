@@ -6,7 +6,7 @@
 
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, memo } from 'react'
 import { ResponseMetadata } from '@/types/api-contract'
 import { useLearningSession } from '@/contexts/LearningSessionContext'
 
@@ -15,7 +15,7 @@ interface QuizFlowProps {
   onGenerateQuiz: () => void
 }
 
-export function QuizFlow({ metadata, onGenerateQuiz }: QuizFlowProps) {
+export const QuizFlow = memo(function QuizFlow({ metadata, onGenerateQuiz }: QuizFlowProps) {
   const { state, addMasteryRecord } = useLearningSession()
   const [quizStarted, setQuizStarted] = useState(false)
   const [currentQuestion, setCurrentQuestion] = useState(0)
@@ -34,7 +34,7 @@ export function QuizFlow({ metadata, onGenerateQuiz }: QuizFlowProps) {
     )
   }
 
-  if (!metadata.quiz || !metadata.quiz.questions.length) {
+  if (!metadata.quiz || !metadata.quiz.questions || metadata.quiz.questions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
         <div className="text-4xl mb-2">🎓</div>
@@ -64,7 +64,7 @@ export function QuizFlow({ metadata, onGenerateQuiz }: QuizFlowProps) {
 
   const handleNextQuestion = () => {
     setAnswers([...answers, currentAnswer])
-    
+
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1)
       setCurrentAnswer('')
@@ -269,4 +269,4 @@ export function QuizFlow({ metadata, onGenerateQuiz }: QuizFlowProps) {
       </button>
     </div>
   )
-}
+})

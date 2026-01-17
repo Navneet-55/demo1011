@@ -105,35 +105,48 @@ export default function Home() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to get explanation')
+        const errorText = await response.text().catch(() => 'Unknown error')
+        throw new Error(`API Error: ${response.status} - ${errorText}`)
       }
 
       // Check if it's a clarification response
-      const contentType = response.headers.get('content-type')
-      if (contentType?.includes('application/json')) {
-        const data = await response.json()
-        if (data.type === 'clarification') {
-          setOutput(
-            `**🤔 I need some clarification:**\n\n${data.questions
-              .map((q: string, i: number) => `${i + 1}. ${q}`)
-              .join('\n')}\n\n*Please provide more details so I can help you better.*`
-          )
-          setTrace(data.trace)
-          setCurrentIntent(data.trace.intent)
-          setIsLoading(false)
-          return
+      const contentType = response.headers.get('content-type') || ''
+      if (contentType.includes('application/json')) {
+        try {
+          const data = await response.json()
+          if (data.type === 'clarification') {
+            setOutput(
+              `**🤔 I need some clarification:**\n\n${Array.isArray(data.questions)
+                ? data.questions
+                    .map((q: string, i: number) => `${i + 1}. ${q}`)
+                    .join('\n')
+                : 'Please provide more details.'}\n\n*Please provide more details so I can help you better.*`
+            )
+            if (data.trace) {
+              setTrace(data.trace)
+              setCurrentIntent(data.trace.intent)
+            }
+            setIsLoading(false)
+            return
+          }
+        } catch (parseError) {
+          console.error('Error parsing clarification response:', parseError)
         }
       }
 
       const reader = response.body?.getReader()
       const decoder = new TextDecoder()
 
-      if (reader) {
-        let accumulatedText = ''
-        let traceExtracted = false
-        let metaExtracted = false
+      if (!reader) {
+        throw new Error('Response body not readable')
+      }
 
-        while (true) {
+      let accumulatedText = ''
+      let traceExtracted = false
+      let metaExtracted = false
+
+      while (true) {
+        try {
           const { done, value } = await reader.read()
 
           if (done) break
@@ -143,17 +156,21 @@ export default function Home() {
 
           // Extract new metadata format __META__
           if (!metaExtracted && accumulatedText.includes('__META__')) {
-            const parsed = parseStreamedResponse(accumulatedText)
-            if (parsed.metadata) {
-              const validated = safeParseMeta(parsed.metadata)
-              if (validated) {
-                setCurrentMetadata(validated)
-                setTrace(validated.trace as any) // For backwards compat
-                setCurrentIntent(validated.trace.intent)
-                metaExtracted = true
+            try {
+              const parsed = parseStreamedResponse(accumulatedText)
+              if (parsed.metadata) {
+                const validated = safeParseMeta(parsed.metadata)
+                if (validated) {
+                  setCurrentMetadata(validated)
+                  setTrace(validated.trace as any) // For backwards compat
+                  setCurrentIntent(validated.trace.intent)
+                  metaExtracted = true
+                }
               }
+              accumulatedText = parsed.content
+            } catch (metaError) {
+              console.error('Error parsing metadata:', metaError)
             }
-            accumulatedText = parsed.content
           }
 
           // Extract legacy trace if present (backwards compatibility)
@@ -211,9 +228,12 @@ export default function Home() {
             setFullOutput('')
             setChunkIndex(0)
           }
+        } catch (readerError) {
+          console.error('Error reading stream:', readerError)
+          throw readerError
         }
       }
-      
+
       // Scroll to output panel after response completes
       if (typeof window !== 'undefined') {
         const outputPanel = document.querySelector('[data-output-panel]')

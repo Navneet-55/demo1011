@@ -6,12 +6,12 @@
 
 'use client'
 
-import React from 'react'
+import React, { memo } from 'react'
 import { SegmentedControl } from '@/components/ui/index'
 import { useLearningSession } from '@/contexts/LearningSessionContext'
 import { Perspective } from '@/types'
 
-export function PerspectiveControl() {
+export const PerspectiveControl = memo(function PerspectiveControl() {
   const { state, setPerspective } = useLearningSession()
 
   const options: Array<{ label: string; value: Perspective; icon: React.ReactNode }> = [
@@ -44,4 +44,4 @@ export function PerspectiveControl() {
       </p>
     </div>
   )
-}
+})

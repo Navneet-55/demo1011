@@ -6,7 +6,7 @@
 
 'use client'
 
-import React from 'react'
+import React, { memo } from 'react'
 import { ResponseMetadata } from '@/types/api-contract'
 import { Badge } from '@/components/ui/index'
 
@@ -14,13 +14,22 @@ interface TracePanelProps {
   metadata: ResponseMetadata | null
 }
 
-export function TracePanel({ metadata }: TracePanelProps) {
+export const TracePanel = memo(function TracePanel({ metadata }: TracePanelProps) {
   if (!metadata) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-slate-400">
         <div className="text-4xl mb-2">🔍</div>
         <p className="text-sm">No trace data available</p>
         <p className="text-xs mt-1">Submit a query to see analysis</p>
+      </div>
+    )
+  }
+
+  // Safety check for metadata structure
+  if (!metadata.trace || typeof metadata.trace !== 'object') {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-slate-400">
+        <p className="text-sm">Invalid trace data</p>
       </div>
     )
   }
@@ -161,4 +170,4 @@ export function TracePanel({ metadata }: TracePanelProps) {
       )}
     </div>
   )
-}
+})

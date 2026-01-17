@@ -6,10 +6,10 @@
 
 'use client'
 
-import React from 'react'
+import React, { memo } from 'react'
 import { useLearningSession } from '@/contexts/LearningSessionContext'
 
-export function FutureYouToggle() {
+export const FutureYouToggle = memo(function FutureYouToggle() {
   const { state, setFutureYou } = useLearningSession()
 
   return (
@@ -21,6 +21,7 @@ export function FutureYouToggle() {
             checked={state.futureYou}
             onChange={(e) => setFutureYou(e.target.checked)}
             className="sr-only peer"
+            aria-label="Toggle Future-You mode"
           />
           <div className="w-11 h-6 bg-slate-300 dark:bg-slate-600 rounded-full peer peer-checked:bg-gradient-to-r peer-checked:from-blue-500 peer-checked:to-purple-500 transition-all"></div>
           <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-5 shadow-sm"></div>
@@ -41,4 +42,4 @@ export function FutureYouToggle() {
       </label>
     </div>
   )
-}
+})

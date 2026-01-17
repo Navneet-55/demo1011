@@ -6,7 +6,7 @@
 
 'use client'
 
-import React from 'react'
+import React, { memo } from 'react'
 
 interface StuckInterventionBannerProps {
   score: number
@@ -14,12 +14,15 @@ interface StuckInterventionBannerProps {
   onDismiss: () => void
 }
 
-export function StuckInterventionBanner({
+export const StuckInterventionBanner = memo(function StuckInterventionBanner({
   score,
   suggestions,
   onDismiss,
 }: StuckInterventionBannerProps) {
-  if (score < 50 || suggestions.length === 0) {
+  // Safety check: clamp score 0-100
+  const safeScore = Math.max(0, Math.min(100, score))
+  
+  if (safeScore < 50 || !Array.isArray(suggestions) || suggestions.length === 0) {
     return null
   }
 
@@ -54,18 +57,19 @@ export function StuckInterventionBanner({
             </ul>
           </div>
         </div>
-        
+
         {/* Progress bar */}
         <div className="mt-3 bg-white/20 rounded-full h-1 overflow-hidden">
           <div
             className="bg-white h-full transition-all duration-500"
-            style={{ width: `${score}%` }}
+            style={{ width: `${safeScore}%` }}
           />
         </div>
         <p className="text-xs text-white/70 mt-1 text-right">
-          Stuck score: {score}/100
+          Stuck score: {safeScore}/100
         </p>
       </div>
     </div>
   )
-}
+})
+

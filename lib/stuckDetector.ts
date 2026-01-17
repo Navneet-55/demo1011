@@ -22,55 +22,82 @@ export function analyzeStuckState(
   cognitiveLoadHistory: CognitiveLoadMode[],
   questionHistory: string[]
 ): StuckAnalysis {
-  let score = 0
-  const suggestions: string[] = []
-  
-  // Recent signals carry more weight
-  const recentSignals = signals.slice(-10)
-  
-  // Calculate severity score
-  recentSignals.forEach((signal) => {
-    const weight = {
-      low: 5,
-      medium: 10,
-      high: 20,
-    }[signal.severity]
-    
-    score += weight
-  })
-  
-  // Check for repeated similar questions
-  const recentQuestions = questionHistory.slice(-5)
-  const questionSimilarity = calculateQuestionSimilarity(recentQuestions)
-  if (questionSimilarity > 0.7) {
-    score += 25
-    suggestions.push('Try a different perspective on the same topic')
-  }
-  
-  // Check for repeated overwhelmed mode
-  const recentOverwhelmed = cognitiveLoadHistory.slice(-5).filter(m => m === 'overwhelmed').length
-  if (recentOverwhelmed >= 3) {
-    score += 20
-    suggestions.push('Switch to 30s timebox for ultra-fast explanations')
-  }
-  
-  // Check for low confidence pattern (inferred from repeated reread)
-  const rereadCount = recentSignals.filter(s => s.type === 'reread').length
-  if (rereadCount >= 3) {
-    score += 15
-    suggestions.push('Try a concrete example to clarify')
-  }
-  
-  // Cap at 100
-  score = Math.min(score, 100)
-  
-  const isStuck = score >= 50
-  
-  return {
-    score,
-    signals: recentSignals,
-    isStuck,
-    suggestions: isStuck ? suggestions : [],
+  try {
+    // Validate inputs
+    if (!Array.isArray(signals)) {
+      signals = []
+    }
+    if (!Array.isArray(cognitiveLoadHistory)) {
+      cognitiveLoadHistory = []
+    }
+    if (!Array.isArray(questionHistory)) {
+      questionHistory = []
+    }
+
+    let score = 0
+    const suggestions: string[] = []
+
+    // Recent signals carry more weight
+    const recentSignals = Array.isArray(signals) ? signals.slice(-10) : []
+
+    // Calculate severity score
+    recentSignals.forEach((signal) => {
+      try {
+        const weight = {
+          low: 5,
+          medium: 10,
+          high: 20,
+        }[signal.severity] || 5
+
+        score += weight
+      } catch {
+        // Ignore malformed signals
+      }
+    })
+
+    // Check for repeated similar questions
+    const recentQuestions = questionHistory.slice(-5)
+    if (recentQuestions.length > 0) {
+      const questionSimilarity = calculateQuestionSimilarity(recentQuestions)
+      if (questionSimilarity > 0.7) {
+        score += 25
+        suggestions.push('Try a different perspective on the same topic')
+      }
+    }
+
+    // Check for repeated overwhelmed mode
+    const recentOverwhelmed = cognitiveLoadHistory.slice(-5).filter(m => m === 'overwhelmed').length
+    if (recentOverwhelmed >= 3) {
+      score += 20
+      suggestions.push('Switch to 30s timebox for ultra-fast explanations')
+    }
+
+    // Check for low confidence pattern (inferred from repeated reread)
+    const rereadCount = recentSignals.filter(s => s?.type === 'reread').length || 0
+    if (rereadCount >= 3) {
+      score += 15
+      suggestions.push('Try a concrete example to clarify')
+    }
+
+    // Cap at 100
+    score = Math.max(0, Math.min(score, 100))
+
+    const isStuck = score >= 50
+
+    return {
+      score,
+      signals: recentSignals,
+      isStuck,
+      suggestions: isStuck ? suggestions : [],
+    }
+  } catch (error) {
+    console.error('Error in analyzeStuckState:', error)
+    return {
+      score: 0,
+      signals: [],
+      isStuck: false,
+      suggestions: [],
+    }
   }
 }
 

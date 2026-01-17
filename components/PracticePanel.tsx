@@ -6,14 +6,14 @@
 
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, memo } from 'react'
 import { ResponseMetadata } from '@/types/api-contract'
 
 interface PracticePanelProps {
   metadata: ResponseMetadata | null
 }
 
-export function PracticePanel({ metadata }: PracticePanelProps) {
+export const PracticePanel = memo(function PracticePanel({ metadata }: PracticePanelProps) {
   const [expandedQuestions, setExpandedQuestions] = useState<Set<number>>(new Set())
   const [taskChecked, setTaskChecked] = useState<boolean[]>([])
 
@@ -176,4 +176,4 @@ export function PracticePanel({ metadata }: PracticePanelProps) {
       )}
     </div>
   )
-}
+})
