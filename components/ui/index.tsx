@@ -7,6 +7,10 @@
 'use client'
 
 import React, { ReactNode } from 'react'
+export { Modal } from './Modal'
+export type { } from './Modal'
+export { Drawer } from './Drawer'
+export type { } from './Drawer'
 
 // ============ SEGMENTED CONTROL ============
 
