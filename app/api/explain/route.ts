@@ -60,71 +60,97 @@ Structure your response as:
 4. **Considerations** - Performance, security, edge cases`,
 }
 
-// Local fallback responses for offline mode
+// Local fallback responses for offline mode with smart code analysis
 const generateLocalResponse = (input: string, mode: Mode): string => {
+  // Analyze input to detect code type
+  const codeType = input.includes('function ') || input.includes('const ') && input.includes('=>') 
+    ? 'function'
+    : input.includes('class ')
+    ? 'class'
+    : input.includes('interface ')
+    ? 'interface'
+    : input.includes('import ')
+    ? 'module imports'
+    : input.includes('for ') || input.includes('while ')
+    ? 'loop'
+    : input.includes('if ') || input.includes('else')
+    ? 'conditional'
+    : input.includes('async ') || input.includes('await ')
+    ? 'async code'
+    : input.includes('[') && input.includes(']')
+    ? 'array operations'
+    : input.includes('{') && input.includes('}')
+    ? 'object/data structure'
+    : 'code'
+
+  // Extract function/class name if present
+  const nameMatch = input.match(/(?:function|class|const)\s+(\w+)/)
+  const name = nameMatch ? nameMatch[1] : 'your code'
+
   const responses: Record<Mode, string> = {
     Beginner: `## 🌱 Understanding Your Code
 
 **What it does:**
-I'm analyzing your code in offline mode. This appears to be ${input.includes('function') ? 'a function' : input.includes('class') ? 'a class' : input.includes('const') || input.includes('let') ? 'a variable declaration' : 'code'}.
+This is ${codeType}. In simple terms, think of it as a set of instructions that tell the computer exactly what to do.
+
+**Breaking it down:**
+- **Lines**: Each line is one instruction
+- **Keywords**: Words like \`function\`, \`if\`, \`for\` are special instructions
+- **Logic**: The code runs from top to bottom
 
 **Why it matters:**
-Understanding code is like reading a recipe - each line tells the computer what to do, step by step.
+Understanding code helps you see how programs think and solve problems.
 
-**How it works:**
-1. The code is processed line by line
-2. Each instruction is executed in order
-3. The result depends on the input you provide
-
-**💡 Tip:** When you're back online, I can give you a much more detailed explanation using AI!
+**💡 Next step:** Connect to the internet for AI to explain exactly what "${name}" does!
 
 ---
-*Currently running in offline mode. Connect to the internet for AI-powered explanations.*`,
+*💻 Offline mode: AI-powered detailed analysis available when connected*`,
 
-    Student: `## 📚 Code Analysis (Offline Mode)
+    Student: `## 📚 Code Analysis (Offline)
 
 **What it does:**
-Your code snippet appears to involve ${input.includes('async') ? 'asynchronous operations' : input.includes('function') ? 'function declarations' : input.includes('import') ? 'module imports' : 'programming logic'}.
+This snippet contains ${codeType}. Based on the structure, it appears to handle ${input.includes('fetch') || input.includes('axios') ? 'API requests' : input.includes('map') || input.includes('filter') ? 'data transformation' : input.includes('async') ? 'asynchronous operations' : 'specific programming logic'}.
 
-**Key Concepts:**
-- **Structure**: The code follows standard syntax patterns
-- **Purpose**: It performs specific operations based on its implementation
-- **Best Practices**: Code should be readable, maintainable, and efficient
+**Structure Analysis:**
+- **Type**: ${codeType}
+- **Pattern**: ${input.includes('export') ? 'Module export pattern' : input.includes('class') ? 'OOP pattern' : input.includes('=>') ? 'Arrow function pattern' : 'Standard implementation'}
+- **Scale**: ${input.length > 500 ? 'Medium-to-large code block' : input.length > 200 ? 'Medium code block' : 'Compact code snippet'}
 
-**How it works:**
-The execution flow depends on the specific constructs used. Without AI analysis, I can provide general observations about the code structure.
-
-**Learning Resources:**
-- Consider MDN Web Docs for JavaScript references
-- Official documentation for the language you're using
-- Online coding platforms for practice
+**Key Observations:**
+- Contains ${input.match(/\/\//g) ? 'comments for documentation' : 'logic without explicit comments'}
+- Uses ${input.includes('const') ? 'const declarations (immutable)' : input.includes('let') ? 'let declarations (mutable)' : 'var declarations'}
+- ${input.includes('try') ? 'Has error handling with try/catch' : 'Error handling should be considered'}
 
 ---
-*Offline mode active. For detailed AI-powered explanations, please connect to the internet.*`,
+*🌐 Online mode unlocked: AI can now provide detailed step-by-step analysis*`,
 
-    Pro: `## ⚡ Technical Analysis (Offline Mode)
+    Pro: `## ⚡ Technical Analysis (Offline)
 
-**Overview:**
-Static analysis indicates ${input.includes('async') ? 'async/await patterns' : input.includes('class') ? 'OOP implementation' : input.includes('function') ? 'functional programming constructs' : 'code logic'}.
+**Code Profile:**
+\`\`\`
+Type: ${codeType}
+Pattern: ${input.includes('async/await') ? 'Async/Promise-based' : input.includes('callback') ? 'Callback-based' : input.includes('class') ? 'Class-based OOP' : input.includes('=>') ? 'Functional/Arrow functions' : 'Imperative'}
+LOC: ${input.split('\n').length} lines
+Complexity: ${input.match(/function/g)?.length || 0} functions detected
+\`\`\`
 
-**Architecture:**
-- **Pattern**: Standard implementation approach detected
-- **Dependencies**: ${input.includes('import') ? 'External module dependencies present' : 'Self-contained logic'}
-- **Complexity**: O(n) time complexity (approximate)
+**Architecture Notes:**
+- **Paradigm**: ${input.includes('class') ? 'Object-Oriented Programming' : input.includes('=>') || input.match(/return.*\w+/g) ? 'Functional Programming' : 'Procedural/Mixed'}
+- **Dependencies**: ${(input.match(/import|require/g) || []).length} module dependencies
+- **Error Handling**: ${input.includes('try') ? '✓ Present' : '⚠ Consider adding'}
 
-**Implementation Notes:**
-Without AI processing, detailed analysis is limited. Key observations:
-- Code structure follows conventional patterns
-- Standard syntax compliance
-- Potential optimization points require runtime analysis
+**Performance Indicators:**
+- **Time Complexity**: Requires runtime profiling
+- **Space Complexity**: ${input.includes('map') || input.includes('filter') ? 'O(n) - Creates new arrays' : 'Requires analysis'}
+- **Optimization Points**: ${input.includes('for') ? 'Loop optimization candidates' : input.includes('recursive') ? 'Consider iterative approach' : 'Review algorithm efficiency'}
 
-**Considerations:**
-- **Performance**: Requires profiling for accurate metrics
-- **Security**: Static analysis recommended for production code
-- **Scalability**: Architecture review needed for large-scale deployment
+**Recommendations:**
+1. Use profiler for accurate metrics
+2. Consider TypeScript for type safety
+3. Add unit tests for coverage
 
 ---
-*Running in offline mode. Connect for advanced AI-powered analysis including pattern recognition, optimization suggestions, and security insights.*`,
+*⚡ Connect to Groq API for real-time AI analysis with advanced pattern recognition*`,
   }
 
   return responses[mode]
