@@ -85,7 +85,7 @@ export const storageUtils = {
         avgClarityRating: 0,
         totalTimeSaved: 0,
         modeBreakdown: { Beginner: 0, Student: 0, Pro: 0 },
-        intentBreakdown: { learn: 0, debug: 0, docs: 0, summarize: 0, test: 0, general: 0 }
+        intentBreakdown: { learn: 0, debug: 0, docs: 0, summarize: 0, practice: 0, test: 0, general: 0 }
       }
     }
 

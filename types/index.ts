@@ -1,10 +1,32 @@
 export type Mode = 'Beginner' | 'Student' | 'Pro'
 
-export type Intent = 'learn' | 'debug' | 'docs' | 'summarize' | 'test' | 'general'
+export type Intent = 'learn' | 'debug' | 'docs' | 'summarize' | 'practice' | 'test' | 'general'
 
 export type ResponseFormat = 'steps' | 'bullets' | 'code-first' | 'analogy' | 'structured'
 
 export type CognitiveLoadMode = 'overwhelmed' | 'balanced' | 'speed' | 'mastery'
+
+// Re-export api-contract types
+export type { ExplainRequest, ExplainResponse, ResponseMetadata, Timebox, Perspective } from './api-contract'
+export { DEFAULT_METADATA, createResponseMetadata } from './api-contract'
+
+// Re-export learning-features types
+export type {
+  MasteryRecord,
+  MasteryRecordStorage,
+  StuckSignal,
+  StuckState,
+  QuickQuestion,
+  MiniTask,
+  CodeExercise,
+  PracticeSet,
+  PracticeProgress,
+  QuizQuestion,
+  QuizAttempt,
+  QuizResult,
+  LearningSessionState,
+} from './learning-features'
+export { DEFAULT_SESSION_STATE } from './learning-features'
 
 export interface ExplanationTrace {
   mode: Mode
