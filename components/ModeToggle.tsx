@@ -5,12 +5,6 @@ import { useState } from 'react'
 
 const modes: Mode[] = ['Beginner', 'Student', 'Pro']
 
-const modeDescriptions: Record<Mode, string> = {
-  Beginner: 'Simple & Clear',
-  Student: 'Balanced Learning',
-  Pro: 'Advanced Tech',
-}
-
 export function ModeToggle() {
   const { mode, setMode } = useMode()
   const [hoveredMode, setHoveredMode] = useState<Mode | null>(null)
@@ -28,33 +22,22 @@ export function ModeToggle() {
 
   return (
     <div className="relative">
-      {/* Outer glow container */}
-      <div className="absolute inset-0 -inset-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-      {/* Main toggle container */}
-      <div className="relative inline-flex items-center gap-1 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 rounded-xl p-1.5 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm shadow-lg dark:shadow-2xl">
-        {/* Background animated gradient */}
-        <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 transition-opacity duration-300" />
-        </div>
-
+      {/* Main toggle container with proper spacing */}
+      <div className="relative inline-flex items-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 rounded-lg p-1 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm shadow-lg dark:shadow-2xl">
+        
         {/* Active indicator - Premium sliding background */}
         <div
-          className="absolute top-2 bottom-2 rounded-lg transition-all duration-300 ease-out pointer-events-none"
+          className="absolute top-1 bottom-1 rounded-md transition-all duration-300 ease-out pointer-events-none"
           style={{
-            left: `calc(${activeIndex} * (100% / 3) + 0.375rem)`,
-            width: `calc(100% / 3 - 0.75rem)`,
-            background: isAnimating
-              ? 'linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(168, 85, 247) 100%)'
-              : 'linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(147, 51, 234) 50%, rgb(168, 85, 247) 100%)',
-            boxShadow: isAnimating
-              ? '0 8px 16px rgba(59, 130, 246, 0.3)'
-              : '0 4px 12px rgba(59, 130, 246, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+            left: `calc(${activeIndex} * 33.333% + 0.25rem)`,
+            width: 'calc(33.333% - 0.5rem)',
+            background: 'linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(147, 51, 234) 50%, rgb(168, 85, 247) 100%)',
+            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.15)',
           }}
         />
 
         {/* Mode buttons */}
-        {modes.map((m) => {
+        {modes.map((m, index) => {
           const isActive = mode === m
           const isHovered = hoveredMode === m
 
@@ -64,42 +47,29 @@ export function ModeToggle() {
               onClick={() => handleModeChange(m)}
               onMouseEnter={() => setHoveredMode(m)}
               onMouseLeave={() => setHoveredMode(null)}
-              className="relative z-10 px-5 py-2.5 text-sm font-semibold transition-all duration-200 group"
-              aria-pressed={isActive}
-              aria-label={`${m} mode`}
-            >
-              {/* Button content container */}
-              <div
-                className={`flex flex-col items-center transition-all duration-200 ${
+              className={`
+                relative z-10 px-6 py-2 text-sm font-semibold
+                transition-all duration-200 ease-out
+                ${
                   isActive
                     ? 'text-white drop-shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400'
-                } ${isHovered && !isActive ? 'text-gray-800 dark:text-gray-200' : ''}`}
-              >
-                {/* Mode name */}
-                <span className="text-xs tracking-wider">{m}</span>
+                    : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                }
+                ${isHovered && !isActive ? 'scale-105' : 'scale-100'}
+                whitespace-nowrap
+              `}
+              aria-pressed={isActive}
+              aria-label={`${m} mode - ${m === 'Beginner' ? 'Simple & Clear explanations' : m === 'Student' ? 'Balanced learning content' : 'Advanced technical content'}`}
+            >
+              <span className="block truncate">{m}</span>
 
-                {/* Hover description - Only show for non-active when hovering */}
-                {isHovered && !isActive && (
-                  <span
-                    className="text-xs opacity-70 whitespace-nowrap transition-all duration-200"
-                    style={{
-                      fontSize: '0.65rem',
-                      marginTop: '1px',
-                    }}
-                  >
-                    {modeDescriptions[m]}
-                  </span>
-                )}
-              </div>
-
-              {/* Hover effect background */}
+              {/* Hover effect background for non-active buttons */}
               {!isActive && (
                 <div
-                  className="absolute inset-0 rounded-lg bg-gray-200/30 dark:bg-gray-700/30 -z-10 transition-all duration-200"
+                  className="absolute inset-0 rounded-md bg-gray-200/40 dark:bg-gray-700/40 -z-10 transition-all duration-200"
                   style={{
                     opacity: isHovered ? 1 : 0,
-                    transform: isHovered ? 'scale(1)' : 'scale(0.95)',
+                    transform: isHovered ? 'scale(1)' : 'scale(0.9)',
                   }}
                 />
               )}
@@ -107,24 +77,8 @@ export function ModeToggle() {
           )
         })}
 
-        {/* Subtle border animation on active */}
-        <div
-          className="absolute inset-0 rounded-xl pointer-events-none transition-all duration-300"
-          style={{
-            border: '1px solid transparent',
-            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(168, 85, 247, 0.2))',
-            backgroundClip: 'padding-box',
-            borderImage: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(168, 85, 247, 0.3) 100%) 1',
-            opacity: isAnimating ? 1 : 0,
-          }}
-        />
-      </div>
-
-      {/* Optional: Floating label indicator */}
-      <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-        <div className="text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">
-          {mode} Mode Active
-        </div>
+        {/* Outer glow on hover */}
+        <div className="absolute inset-0 -inset-1 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </div>
     </div>
   )
