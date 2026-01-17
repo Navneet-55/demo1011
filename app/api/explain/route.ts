@@ -1,9 +1,9 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import Groq from 'groq-sdk'
 import { NextRequest, NextResponse } from 'next/server'
 
-// Initialize Gemini (will be null if API key not provided)
-const genAI = process.env.GEMINI_API_KEY 
-  ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+// Initialize Groq (will be null if API key not provided)
+const groq = process.env.GROQ_API_KEY 
+  ? new Groq({ apiKey: process.env.GROQ_API_KEY })
   : null
 
 type Mode = 'Beginner' | 'Student' | 'Pro'
