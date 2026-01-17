@@ -6,12 +6,12 @@
 
 'use client'
 
-import React from 'react'
+import React, { memo } from 'react'
 import { SegmentedControl } from '@/components/ui/index'
 import { useLearningSession } from '@/contexts/LearningSessionContext'
 import { Timebox } from '@/types'
 
-export function TimeboxControl() {
+export const TimeboxControl = memo(function TimeboxControl() {
   const { state, setTimebox } = useLearningSession()
 
   const options: Array<{ label: string; value: Timebox; icon: React.ReactNode }> = [
@@ -38,4 +38,4 @@ export function TimeboxControl() {
       </p>
     </div>
   )
-}
+})

@@ -27,7 +27,15 @@ export function PracticePanel({ metadata }: PracticePanelProps) {
     )
   }
 
+  // Safety checks for practice data
   const { practice } = metadata
+  if (!practice || typeof practice !== 'object') {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-slate-400">
+        <p className="text-sm">Invalid practice data</p>
+      </div>
+    )
+  }
 
   const toggleQuestion = (index: number) => {
     const newExpanded = new Set(expandedQuestions)
