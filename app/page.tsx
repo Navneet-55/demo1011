@@ -13,6 +13,7 @@ import { useMode } from '@/components/ModeProvider'
 import { useOnlineOffline } from '@/contexts/OnlineOfflineContext'
 import { useKnowledgeGraph } from '@/contexts/KnowledgeGraphContext'
 import { ExplanationTrace, ImpactMetrics, Intent } from '@/types'
+import { storageUtils } from '@/lib/localStorage'
 
 export const dynamic = 'force-dynamic'
 
@@ -172,16 +173,28 @@ export default function Home() {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             GyaanForge
           </h1>
-          <button
-            onClick={() => setShowDevCopilot(!showDevCopilot)}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              showDevCopilot
-                ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-            }`}
-          >
-            {showDevCopilot ? '📝 Standard Mode' : '🚀 Dev Copilot Mode'}
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowKnowledgeGraph(!showKnowledgeGraph)}
+              className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
+                showKnowledgeGraph
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              {showKnowledgeGraph ? '🌐 Graph On' : '🌐 Graph Off'}
+            </button>
+            <button
+              onClick={() => setShowDevCopilot(!showDevCopilot)}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                showDevCopilot
+                  ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              {showDevCopilot ? '📝 Standard Mode' : '🚀 Dev Copilot Mode'}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -209,8 +222,8 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          /* Standard View */
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-16rem)]">
+          /* Standard View with Knowledge Graph */
+          <div className={`grid ${showKnowledgeGraph ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1 lg:grid-cols-2'} gap-6 h-[calc(100vh-16rem)]`}>
             <div className="flex flex-col">
               <InputPanel
                 mode={mode}
@@ -231,6 +244,16 @@ export default function Home() {
                 </div>
               )}
             </div>
+            {showKnowledgeGraph && (
+              <div className="flex flex-col gap-4 h-full">
+                <div className="flex-1 min-h-0">
+                  <KnowledgeGraphVisualizer />
+                </div>
+                <div className="h-64 min-h-0 overflow-hidden">
+                  <ConceptExplorer />
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>
