@@ -19,7 +19,7 @@ export function Header() {
           </div>
 
           {/* Mode Toggle */}
-          <div className="flex-1 flex justify-center">
+          <div className="flex-1 flex justify-center group">
             <ModeToggle />
           </div>
 
