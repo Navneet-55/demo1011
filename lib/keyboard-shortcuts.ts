@@ -3,7 +3,7 @@
  * Provides hooks and utilities for handling global keyboard shortcuts
  */
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect } from 'react'
 
 interface UseKeyboardShortcutOptions {
   ctrlKey?: boolean
