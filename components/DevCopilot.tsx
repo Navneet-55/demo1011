@@ -64,16 +64,18 @@ export default function DevCopilot({ mode, onSubmit, isLoading }: DevCopilotProp
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 dark:border-gray-700">
+      <div className="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 font-medium transition-colors ${
+            className={`flex-1 min-w-max flex items-center justify-center gap-2 px-4 py-3 font-medium transition-colors ${
               activeTab === tab.id
                 ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-500'
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
             }`}
+            aria-selected={activeTab === tab.id}
+            role="tab"
           >
             <span className="text-lg">{tab.icon}</span>
             <span className="hidden sm:inline">{tab.label}</span>

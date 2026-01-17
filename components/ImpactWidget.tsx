@@ -45,7 +45,7 @@ export default function ImpactWidget({ onSave, mode, intent }: ImpactWidgetProps
 
   if (showSummary && summary) {
     return (
-      <div className="fixed bottom-6 right-6 w-96 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 z-50">
+      <div className="fixed bottom-6 right-6 w-full max-w-sm sm:max-w-md md:max-w-lg lg:w-96 mx-4 sm:mx-0 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 z-50 max-h-[90vh] overflow-y-auto">
         <div className="px-4 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-t-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -155,14 +155,16 @@ export default function ImpactWidget({ onSave, mode, intent }: ImpactWidgetProps
       <div className="fixed bottom-6 right-6 flex flex-col gap-2 z-50">
         <button
           onClick={() => setShowSummary(true)}
-          className="px-4 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2"
+          className="px-4 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
+          aria-label="View impact summary"
         >
           <span className="text-lg">📊</span>
           <span className="font-medium">View Impact</span>
         </button>
         <button
           onClick={() => setIsOpen(true)}
-          className="px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2"
+          className="px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+          aria-label="Rate this response"
         >
           <span className="text-lg">📈</span>
           <span className="font-medium">Rate Response</span>
