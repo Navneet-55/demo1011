@@ -60,6 +60,3 @@ export function ModeToggle() {
     </div>
   )
 }
-    </div>
-  )
-}
