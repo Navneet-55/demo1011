@@ -36,8 +36,12 @@ export default function Page() {
       <GlobalNav />
       <ProductSubNav />
 
-      <Hero onPrimary={() => document.getElementById('specs')?.scrollIntoView({ behavior: 'smooth' })} />
-      <Highlights />
+      <section id="overview">
+        <Hero onPrimary={() => document.getElementById('specs')?.scrollIntoView({ behavior: 'smooth' })} />
+      </section>
+      <section id="highlights">
+        <Highlights />
+      </section>
 
       {/* Design */}
       <SectionLayout
@@ -89,7 +93,9 @@ export default function Page() {
       </SectionLayout>
 
       {/* Feature strip + comparison */}
-      <CompareCards />
+      <section id="shared">
+        <CompareCards />
+      </section>
 
       {/* Accessories */}
       <section id="accessories" className="py-20 bg-white dark:bg-gray-950">
