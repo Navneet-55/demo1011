@@ -1,11 +1,18 @@
 'use client'
 
+import React, { useState } from 'react'
 import { useTheme } from './ThemeProvider'
 import { ModeToggle } from '@/components/ModeToggle'
 import { OnlineOfflineToggle } from './OnlineOfflineToggle'
 
-export function Header() {
+interface HeaderProps {
+  onCommandPaletteOpen?: () => void
+}
+
+export function Header({ onCommandPaletteOpen }: HeaderProps) {
   const { theme, toggleTheme } = useTheme()
+  const isMac = typeof window !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform)
+  const shortcutHint = isMac ? '⌘K' : 'Ctrl+K'
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-950/90 backdrop-blur-md shadow-sm dark:shadow-md transition-all duration-300">
@@ -25,6 +32,20 @@ export function Header() {
           <div className="flex-1 flex justify-center">
             <ModeToggle />
           </div>
+
+          {/* Command Palette Button - Hidden on mobile */}
+          {onCommandPaletteOpen && (
+            <button
+              onClick={onCommandPaletteOpen}
+              className="hidden sm:flex flex-shrink-0 relative items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 group"
+              title="Open command palette"
+            >
+              <span className="text-gray-600 dark:text-gray-400 text-sm">✨</span>
+              <span className="hidden md:inline text-xs text-gray-600 dark:text-gray-400 font-mono">
+                {shortcutHint}
+              </span>
+            </button>
+          )}
 
           {/* Online/Offline Toggle */}
           <div className="flex-shrink-0">

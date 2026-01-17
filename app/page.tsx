@@ -301,7 +301,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-950">
-      <Header />
+      <Header onCommandPaletteOpen={() => setIsPaletteOpen(true)} />
 
       {/* Mode Toggle */}
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4">
