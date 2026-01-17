@@ -31,7 +31,7 @@ export function StuckInterventionBanner({
           <div className="flex-1 space-y-2">
             <div className="flex items-center justify-between">
               <h4 className="font-semibold">
-                Stuck? Let's try a different approach
+                Stuck? Let&apos;s try a different approach
               </h4>
               <button
                 onClick={onDismiss}

@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { toolRegistry } from '@/lib/tools'
 import { guardrails } from '@/lib/guardrails'
 import { extractConceptsFromText } from '@/lib/conceptExtractor'
-import { ExplanationTrace, Mode, Intent } from '@/types'
+import { ExplanationTrace, Mode, Intent, ResponseMetadata, Timebox, Perspective } from '@/types'
+import { createResponseMetadata } from '@/types/api-contract'
 
 // Initialize Groq (will be null if API key not provided)
 const groq = process.env.GROQ_API_KEY 
