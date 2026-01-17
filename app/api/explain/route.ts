@@ -220,7 +220,17 @@ const getExplanation = async (input: string, mode: Mode, forceOffline: boolean =
 
 export async function POST(req: NextRequest) {
   try {
-    const { input, mode, forceOffline, toolId, context } = await req.json()
+    const { 
+      input, 
+      mode, 
+      forceOffline, 
+      toolId, 
+      context,
+      timebox = '2m',
+      perspective = 'story',
+      futureYou = false,
+      stuckScore = 0,
+    } = await req.json()
 
     if (!input || !mode) {
       return new NextResponse('Missing required fields', { status: 400 })
@@ -228,6 +238,33 @@ export async function POST(req: NextRequest) {
 
     const startTime = Date.now()
     const detectedIntent = guardrails.detectIntent(input)
+    const responseId = `resp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    
+    // Build perspective modifier
+    const perspectiveModifiers: Record<Perspective, string> = {
+      story: 'Use a narrative style with context, flow, and storytelling.',
+      diagram: 'Describe visual structure, diagrams, and spatial relationships.',
+      code: 'Start with code examples and implementation details first.',
+      analogy: 'Use real-world analogies, metaphors, and comparisons.',
+      math: 'Use mathematical notation, formulas, and formal definitions.',
+    }
+    
+    // Build timebox modifier
+    const timeboxModifiers: Record<Timebox, string> = {
+      '30s': 'ULTRA-CONCISE: Keep response under 100 words. Only essential points.',
+      '2m': 'BALANCED: Keep response focused, around 200-300 words.',
+      'deep': 'COMPREHENSIVE: Provide deep analysis with examples, edge cases, and nuances.',
+    }
+    
+    // Build futureYou modifier
+    const futureYouModifier = futureYou
+      ? '\n\nIMPORTANT: Speak as "you in 6 months" explaining to your past self. Be empathetic, concise, and encouraging. Use phrases like "Hey past-me" or "Trust me, you\'ll get this".'
+      : ''
+    
+    // Build stuck intervention modifier
+    const stuckModifier = stuckScore > 50
+      ? '\n\nUSER IS STUCK: Use simpler language, concrete examples, and shorter sentences. Break down into tiny steps.'
+      : ''
     
     // Use tool if specified, otherwise use default explanation
     let finalPrompt: string
@@ -274,7 +311,15 @@ export async function POST(req: NextRequest) {
       const uncertaintyCheck = guardrails.checkUncertainty(input, detectedIntent)
       const ambiguityCheck = guardrails.detectAmbiguity(input, detectedIntent)
 
-      finalPrompt = `${systemPrompts[mode as Mode]}\n\nUser question:\n${input}`
+      // Build enhanced prompt with modifiers
+      finalPrompt = `${systemPrompts[mode as Mode]}
+
+RESPONSE CONSTRAINTS:
+- ${timeboxModifiers[timebox as Timebox]}
+- ${perspectiveModifiers[perspective as Perspective]}${futureYouModifier}${stuckModifier}
+
+User question:
+${input}`
 
       if (ambiguityCheck) {
         clarifyingQuestions = ambiguityCheck.questions
@@ -315,17 +360,17 @@ export async function POST(req: NextRequest) {
     
     trace.processingTimeMs = Date.now() - startTime
 
-    // Create a new stream that includes both content, trace, and knowledge graph
+    // Create a new stream that includes both content, trace, knowledge graph, and metadata
     const encoder = new TextEncoder()
     const reader = stream.getReader()
     
     return new NextResponse(
       new ReadableStream({
         async start(controller) {
-          // First, send the trace as a special message
+          // First, send the trace as a special message (backwards compatibility)
           controller.enqueue(encoder.encode(`__TRACE__${JSON.stringify(trace)}__TRACE__`))
           
-          // Collect full text for concept extraction
+          // Collect full text for concept extraction and practice generation
           let fullText = ''
           
           // Then stream the content
@@ -347,6 +392,59 @@ export async function POST(req: NextRequest) {
               controller.enqueue(encoder.encode(`__GRAPH__${JSON.stringify(knowledgeGraph)}__GRAPH__`))
             } catch (error) {
               console.error('Failed to extract knowledge graph:', error)
+            }
+            
+            // Generate comprehensive metadata
+            try {
+              const metadata: ResponseMetadata = createResponseMetadata(
+                responseId,
+                input.slice(0, 50), // Use input as topic
+                {
+                  trace: {
+                    intent: detectedIntent,
+                    pedagogy: perspective as Perspective,
+                    timebox: timebox as Timebox,
+                    cognitiveLoad: 'balanced', // TODO: Get from session
+                    futureYou,
+                    omitted: [],
+                    uncertainty: trace.guardrails.uncertaintyFlag ? {
+                      isUncertain: true,
+                      why: trace.guardrails.uncertaintyReason,
+                      verifySteps: [],
+                    } : {
+                      isUncertain: false,
+                    },
+                    clarifyingQuestionsAsked: trace.guardrails.questionsAsked || [],
+                    stuckInterventionApplied: stuckScore > 50,
+                  },
+                  practice: detectedIntent === 'learn' ? {
+                    quickQuestions: [
+                      { q: `What is the main concept in "${input.slice(0, 30)}..."?`, a: 'Review the explanation above' },
+                      { q: 'How would you explain this to a friend?', a: 'Use simple terms and real-world examples' },
+                      { q: 'What are potential use cases?', a: 'Consider practical applications' },
+                    ],
+                    miniTask: {
+                      title: 'Quick Practice',
+                      steps: [
+                        'Read the explanation carefully',
+                        'Try to explain it in your own words',
+                        'Think of a real-world example',
+                      ],
+                    },
+                  } : undefined,
+                  quiz: detectedIntent === 'learn' ? {
+                    questions: [
+                      { q: `Explain the key concept from "${input.slice(0, 30)}..."`, expectedKeywords: ['concept', 'understand', 'explain'] },
+                      { q: 'What problem does this solve?', expectedKeywords: ['problem', 'solution', 'purpose'] },
+                      { q: 'How is this used in practice?', expectedKeywords: ['practice', 'use', 'application'] },
+                    ],
+                  } : undefined,
+                }
+              )
+              
+              controller.enqueue(encoder.encode(`__META__${JSON.stringify(metadata)}__META__`))
+            } catch (error) {
+              console.error('Failed to generate metadata:', error)
             }
             
             controller.close()
