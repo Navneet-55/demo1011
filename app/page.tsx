@@ -7,8 +7,11 @@ import { OutputPanel } from '@/components/OutputPanel'
 import DevCopilot from '@/components/DevCopilot'
 import WhyThisAnswer from '@/components/WhyThisAnswer'
 import ImpactWidget from '@/components/ImpactWidget'
+import { KnowledgeGraphVisualizer } from '@/components/KnowledgeGraphVisualizer'
+import { ConceptExplorer } from '@/components/ConceptExplorer'
 import { useMode } from '@/components/ModeProvider'
 import { useOnlineOffline } from '@/contexts/OnlineOfflineContext'
+import { useKnowledgeGraph } from '@/contexts/KnowledgeGraphContext'
 import { ExplanationTrace, ImpactMetrics, Intent, CognitiveLoadMode } from '@/types'
 import { storageUtils } from '@/lib/localStorage'
 
@@ -24,6 +27,7 @@ const COGNITIVE_LOAD_CONFIG = {
 export default function Home() {
   const { mode } = useMode()
   const { effectiveMode } = useOnlineOffline()
+  const { addGraph } = useKnowledgeGraph()
   const [input, setInput] = useState('')
   const [output, setOutput] = useState('')
   const [fullOutput, setFullOutput] = useState('')
@@ -32,6 +36,7 @@ export default function Home() {
   const [trace, setTrace] = useState<ExplanationTrace | null>(null)
   const [currentIntent, setCurrentIntent] = useState<Intent>('general')
   const [showDevCopilot, setShowDevCopilot] = useState(false)
+  const [showKnowledgeGraph, setShowKnowledgeGraph] = useState(true)
   const [cognitiveLoad, setCognitiveLoad] = useState<CognitiveLoadMode>('balanced')
 
   // Load cognitive load preference from localStorage
@@ -133,6 +138,26 @@ export default function Home() {
             }
           }
 
+          // Extract knowledge graph if present
+          if (accumulatedText.includes('__GRAPH__')) {
+            const graphMatch = accumulatedText.match(
+              /__GRAPH__(.+?)__GRAPH__/
+            )
+            if (graphMatch) {
+              try {
+                const extractedGraph = JSON.parse(graphMatch[1])
+                addGraph(extractedGraph)
+                // Remove graph from output
+                accumulatedText = accumulatedText.replace(
+                  /__GRAPH__.+?__GRAPH__/,
+                  ''
+                )
+              } catch (e) {
+                console.error('Failed to parse knowledge graph:', e)
+              }
+            }
+          }
+
           // Apply chunked rendering based on cognitive load
           const config = COGNITIVE_LOAD_CONFIG[cognitiveLoad]
           if (config.chunkSize > 0 && accumulatedText.length > config.chunkSize) {
@@ -220,6 +245,18 @@ export default function Home() {
                 </button>
               ))}
             </div>
+
+            {/* Knowledge Graph Toggle */}
+            <button
+              onClick={() => setShowKnowledgeGraph(!showKnowledgeGraph)}
+              className={`px-4 py-2 rounded-lg font-medium transition-all text-sm ${
+                showKnowledgeGraph
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              {showKnowledgeGraph ? '🌐 Graph On' : '🌐 Graph Off'}
+            </button>
             
             <button
               onClick={() => setShowDevCopilot(!showDevCopilot)}
@@ -259,8 +296,8 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          /* Standard View */
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-16rem)]">
+          /* Standard View with Knowledge Graph */
+          <div className={`grid ${showKnowledgeGraph ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1 lg:grid-cols-2'} gap-6 h-[calc(100vh-16rem)]`}>
             <div className="flex flex-col">
               <InputPanel
                 mode={mode}
@@ -294,6 +331,16 @@ export default function Home() {
                 </div>
               )}
             </div>
+            {showKnowledgeGraph && (
+              <div className="flex flex-col gap-4 h-full">
+                <div className="flex-1 min-h-0">
+                  <KnowledgeGraphVisualizer />
+                </div>
+                <div className="h-64 min-h-0 overflow-hidden">
+                  <ConceptExplorer />
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>
