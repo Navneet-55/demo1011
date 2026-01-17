@@ -1,7 +1,7 @@
 'use client'
 
 import { useTheme } from './ThemeProvider'
-import { ModeToggle } from './ModeToggle'
+import { ModeToggle } from '@/components/ModeToggle'
 import { OnlineOfflineToggle } from './OnlineOfflineToggle'
 
 export function Header() {
