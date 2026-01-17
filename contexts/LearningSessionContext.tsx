@@ -6,7 +6,7 @@
 
 'use client'
 
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useReducer, useEffect, ReactNode, useCallback, useMemo } from 'react'
 import {
   LearningSessionState,
   DEFAULT_SESSION_STATE,
@@ -17,6 +17,9 @@ import {
 } from '@/types/learning-features'
 import { Timebox, Perspective } from '@/types/api-contract'
 import { getStorageItem, setStorageItem } from '@/lib/storage-wrapper'
+
+// Debug mode for development
+const DEBUG = process.env.NODE_ENV === 'development'
 
 // ============ CONTEXT ============
 
@@ -37,6 +40,27 @@ interface LearningSessionContextType {
 
 const LearningSessionContext = createContext<LearningSessionContextType | null>(null)
 
+// Validate action payload types
+function validateAction(action: Action): boolean {
+  try {
+    switch (action.type) {
+      case 'SET_TIMEBOX':
+        return ['30s', '2m', 'deep'].includes(action.payload)
+      case 'SET_PERSPECTIVE':
+        return ['story', 'diagram', 'code', 'analogy', 'math'].includes(action.payload)
+      case 'SET_FUTURE_YOU':
+        return typeof action.payload === 'boolean'
+      case 'SET_STUCK_SCORE':
+        return typeof action.payload === 'number' && action.payload >= 0 && action.payload <= 100
+      default:
+        return true
+    }
+  } catch (error) {
+    DEBUG && console.error('Action validation error:', error)
+    return false
+  }
+}
+
 // ============ REDUCER ============
 
 type Action =
@@ -55,6 +79,12 @@ type Action =
   | { type: 'HYDRATE'; payload: Partial<LearningSessionState> }
 
 function reducer(state: LearningSessionState, action: Action): LearningSessionState {
+  // Validate action before processing
+  if (!validateAction(action)) {
+    DEBUG && console.warn(`Invalid action payload for type: ${action.type}`, action)
+    return state
+  }
+
   switch (action.type) {
     case 'SET_TIMEBOX':
       return { ...state, timebox: action.payload }

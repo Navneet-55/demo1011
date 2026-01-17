@@ -75,29 +75,60 @@ export function QuizFlow({ metadata, onGenerateQuiz }: QuizFlowProps) {
   }
 
   const gradeQuiz = (allAnswers: string[]) => {
-    let totalScore = 0
-    
-    questions.forEach((q, i) => {
-      const answer = allAnswers[i]?.toLowerCase() || ''
-      const keywordMatches = q.expectedKeywords.filter(kw =>
-        answer.includes(kw.toLowerCase())
-      ).length
-      
-      const questionScore = (keywordMatches / q.expectedKeywords.length) * 100
-      totalScore += questionScore
-    })
-    
-    const avgScore = Math.round(totalScore / questions.length)
-    setMasteryScore(avgScore)
-    setQuizComplete(true)
-    
-    // Save to mastery history
-    addMasteryRecord({
-      topic: metadata.topic,
-      score: avgScore,
-      date: new Date().toISOString(),
-      sessionId: metadata.responseId,
-    })
+    try {
+      // Validate quiz data
+      if (!questions || questions.length === 0) {
+        console.error('No questions available for grading')
+        return
+      }
+
+      let totalScore = 0
+      let questionsGraded = 0
+
+      questions.forEach((q, i) => {
+        try {
+          const answer = allAnswers[i]?.toLowerCase() || ''
+          
+          // Safety check for expectedKeywords
+          const keywords = Array.isArray(q.expectedKeywords) ? q.expectedKeywords : []
+          if (keywords.length === 0) {
+            console.warn(`Question ${i} has no keywords, defaulting to 50%`)
+            totalScore += 50
+          } else {
+            const keywordMatches = keywords.filter(kw =>
+              answer.includes(kw.toLowerCase())
+            ).length
+
+            const questionScore = (keywordMatches / keywords.length) * 100
+            totalScore += questionScore
+          }
+          questionsGraded++
+        } catch (qError) {
+          console.error(`Error grading question ${i}:`, qError)
+          totalScore += 50 // Default score on error
+        }
+      })
+
+      const avgScore = questionsGraded > 0 ? Math.round(totalScore / questionsGraded) : 0
+      setMasteryScore(Math.max(0, Math.min(100, avgScore))) // Clamp 0-100
+      setQuizComplete(true)
+
+      // Save to mastery history with error handling
+      try {
+        addMasteryRecord({
+          topic: metadata.topic || 'Unknown Topic',
+          score: avgScore,
+          date: new Date().toISOString(),
+          sessionId: metadata.responseId || `session_${Date.now()}`,
+        })
+      } catch (saveError) {
+        console.error('Failed to save mastery record:', saveError)
+      }
+    } catch (error) {
+      console.error('Error during quiz grading:', error)
+      setMasteryScore(0)
+      setQuizComplete(true)
+    }
   }
 
   if (!quizStarted) {
