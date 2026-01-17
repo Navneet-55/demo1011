@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTheme } from './ThemeProvider'
 import { ModeToggle } from '@/components/ModeToggle'
 import { OnlineOfflineToggle } from './OnlineOfflineToggle'
@@ -11,7 +11,15 @@ interface HeaderProps {
 
 export function Header({ onCommandPaletteOpen }: HeaderProps) {
   const { theme, toggleTheme } = useTheme()
-  const isMac = typeof window !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform)
+  const [isMac, setIsMac] = useState(false)
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  // Detect platform only on client after hydration
+  useEffect(() => {
+    setIsMac(/Mac|iPhone|iPad|iPod/.test(navigator.platform))
+    setIsHydrated(true)
+  }, [])
+
   const shortcutHint = isMac ? '⌘K' : 'Ctrl+K'
 
   return (
@@ -41,9 +49,11 @@ export function Header({ onCommandPaletteOpen }: HeaderProps) {
               title="Open command palette"
             >
               <span className="text-gray-600 dark:text-gray-400 text-sm">✨</span>
-              <span className="hidden md:inline text-xs text-gray-600 dark:text-gray-400 font-mono">
-                {shortcutHint}
-              </span>
+              {isHydrated && (
+                <span className="hidden md:inline text-xs text-gray-600 dark:text-gray-400 font-mono">
+                  {shortcutHint}
+                </span>
+              )}
             </button>
           )}
 
