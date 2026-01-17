@@ -32,13 +32,13 @@ export function Header() {
             {/* Online/Offline Toggle */}
             <OnlineOfflineToggle />
 
-          {/* Enhanced Dark Mode Toggle */}
-          <button
-            onClick={toggleTheme}
-            className="flex-shrink-0 relative p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group overflow-hidden"
-            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            title={`${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
-          >
+            {/* Enhanced Dark Mode Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="flex-shrink-0 relative p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group overflow-hidden"
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              title={`${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+            >
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
             {theme === 'dark' ? (
               <svg
@@ -62,6 +62,7 @@ export function Header() {
               </svg>
             )}
           </button>
+          </div>
         </div>
       </div>
     </header>
