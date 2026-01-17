@@ -18,7 +18,6 @@ import { TracePanel } from '@/components/TracePanel'
 import { PracticePanel } from '@/components/PracticePanel'
 import { QuizFlow } from '@/components/QuizFlow'
 import { StuckInterventionBanner } from '@/components/StuckInterventionBanner'
-import { CommandPalette } from '@/components/CommandPalette'
 import { Tabs } from '@/components/ui/index'
 import { useMode } from '@/components/ModeProvider'
 import { useOnlineOffline } from '@/contexts/OnlineOfflineContext'
@@ -32,7 +31,6 @@ import { generateFallbackMetadata } from '@/lib/meta-fallback'
 import { analyzeStuckState } from '@/lib/stuckDetector'
 import { COGNITIVE_LOAD_CONFIG, STORAGE_KEYS, DEBUG_CONFIG } from '@/lib/constants'
 import { sanitizeString } from '@/lib/validators'
-import { useCommandPaletteShortcut } from '@/lib/keyboard-shortcuts'
 
 export const dynamic = 'force-dynamic'
 
@@ -62,12 +60,6 @@ export default function Home() {
   const [currentMetadata, setCurrentMetadata] = useState<ResponseMetadata | null>(null)
   const [showRightPanel, setShowRightPanel] = useState(true)
   const [stuckDismissed, setStuckDismissed] = useState(false)
-  const [isPaletteOpen, setIsPaletteOpen] = useState(false)
-
-  // Setup Cmd/Ctrl+K shortcut for command palette
-  useCommandPaletteShortcut(() => {
-    setIsPaletteOpen(true)
-  })
 
   // Load cognitive load preference from localStorage with validation
   useEffect(() => {
@@ -301,7 +293,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-950">
-      <Header onCommandPaletteOpen={() => setIsPaletteOpen(true)} />
+      <Header />
 
       {/* Control Bar - Organized by Category */}
       <div className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
@@ -356,19 +348,32 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Views */}
+            {/* Views & Actions */}
             <div className="flex flex-col gap-2">
-              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">View</p>
-              <button
-                onClick={() => setShowDevCopilot(!showDevCopilot)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${
-                  showDevCopilot
-                    ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                }`}
-              >
-                {showDevCopilot ? '🚀 Dev Mode' : '📚 Learning'}
-              </button>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">View & Actions</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowDevCopilot(!showDevCopilot)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${
+                    showDevCopilot
+                      ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                  }`}
+                >
+                  {showDevCopilot ? '🚀 Dev' : '📚 Learn'}
+                </button>
+                
+                <button
+                  onClick={() => setShowRightPanel(!showRightPanel)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${
+                    showRightPanel
+                      ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                  }`}
+                >
+                  {showRightPanel ? '📊 Tools' : '📊 Show Tools'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -590,17 +595,6 @@ export default function Home() {
           onDismiss={() => setStuckDismissed(true)}
         />
       )}
-
-      {/* Command Palette */}
-      <CommandPalette
-        isOpen={isPaletteOpen}
-        onClose={() => setIsPaletteOpen(false)}
-        context={{
-          input,
-          currentMode: mode,
-          currentIntent,
-        }}
-      />
     </div>
   )
 }
