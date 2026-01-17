@@ -480,6 +480,19 @@ export default function Home() {
           intent={currentIntent}
         />
       )}
+
+      {/* Feature #8: Stuck Intervention Banner */}
+      {!stuckDismissed && sessionState.stuckState.score >= 50 && (
+        <StuckInterventionBanner
+          score={sessionState.stuckState.score}
+          suggestions={analyzeStuckState(
+            sessionState.stuckState.signals,
+            [],
+            []
+          ).suggestions}
+          onDismiss={() => setStuckDismissed(true)}
+        />
+      )}
     </div>
   )
 }
