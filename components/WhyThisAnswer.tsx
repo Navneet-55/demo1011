@@ -48,7 +48,7 @@ export default function WhyThisAnswer({ trace }: WhyThisAnswerProps) {
           <span className="font-medium text-gray-700 dark:text-gray-300">
             Why this answer?
           </span>
-          {trace.guardrails.uncertaintyFlag && (
+          {trace.guardrails?.uncertaintyFlag && (
             <span className="px-2 py-0.5 text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-full">
               ⚠️ Uncertain
             </span>
@@ -101,12 +101,12 @@ export default function WhyThisAnswer({ trace }: WhyThisAnswerProps) {
             </div>
             <ul className="space-y-1.5 ml-4">
               <li className="flex items-start gap-2">
-                <span className={trace.guardrails.askedClarifyingQuestions ? 'text-green-500' : 'text-gray-400'}>
-                  {trace.guardrails.askedClarifyingQuestions ? '✅' : '⭕'}
+                <span className={trace.guardrails?.askedClarifyingQuestions ? 'text-green-500' : 'text-gray-400'}>
+                  {trace.guardrails?.askedClarifyingQuestions ? '✅' : '⭕'}
                 </span>
                 <span className="text-gray-700 dark:text-gray-300">
                   Clarifying Questions
-                  {trace.guardrails.askedClarifyingQuestions && trace.guardrails.questionsAsked && (
+                  {trace.guardrails?.askedClarifyingQuestions && trace.guardrails?.questionsAsked && (
                     <div className="mt-1 text-xs text-gray-600 dark:text-gray-400">
                       {trace.guardrails.questionsAsked.map((q, i) => (
                         <div key={i}>• {q}</div>
@@ -116,20 +116,20 @@ export default function WhyThisAnswer({ trace }: WhyThisAnswerProps) {
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className={trace.guardrails.structuredOutputApplied ? 'text-green-500' : 'text-gray-400'}>
-                  {trace.guardrails.structuredOutputApplied ? '✅' : '⭕'}
+                <span className={trace.guardrails?.structuredOutputApplied ? 'text-green-500' : 'text-gray-400'}>
+                  {trace.guardrails?.structuredOutputApplied ? '✅' : '⭕'}
                 </span>
                 <span className="text-gray-700 dark:text-gray-300">
                   Structured Output Format
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className={trace.guardrails.uncertaintyFlag ? 'text-yellow-500' : 'text-green-500'}>
-                  {trace.guardrails.uncertaintyFlag ? '⚠️' : '✅'}
+                <span className={trace.guardrails?.uncertaintyFlag ? 'text-yellow-500' : 'text-green-500'}>
+                  {trace.guardrails?.uncertaintyFlag ? '⚠️' : '✅'}
                 </span>
                 <span className="text-gray-700 dark:text-gray-300">
                   Confidence Check
-                  {trace.guardrails.uncertaintyFlag && trace.guardrails.uncertaintyReason && (
+                  {trace.guardrails?.uncertaintyFlag && trace.guardrails?.uncertaintyReason && (
                     <div className="mt-1 text-xs text-yellow-600 dark:text-yellow-400">
                       ⚠️ {trace.guardrails.uncertaintyReason}
                     </div>
