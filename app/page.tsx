@@ -535,6 +535,17 @@ export default function Home() {
           onDismiss={() => setStuckDismissed(true)}
         />
       )}
+
+      {/* Command Palette */}
+      <CommandPalette
+        isOpen={isPaletteOpen}
+        onClose={() => setIsPaletteOpen(false)}
+        context={{
+          input,
+          currentMode: mode,
+          currentIntent,
+        }}
+      />
     </div>
   )
 }
