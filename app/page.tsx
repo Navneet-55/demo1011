@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { Header } from '@/components/Header'
 import { InputPanel } from '@/components/InputPanel'
 import { OutputPanel } from '@/components/OutputPanel'
-import { ModeProvider, useMode } from '@/components/ModeProvider'
+import { useMode } from '@/components/ModeProvider'
 
-function HomeContent() {
+export const dynamic = 'force-dynamic'
+
+export default function Home() {
   const { mode } = useMode()
   const [input, setInput] = useState('')
   const [output, setOutput] = useState('')
@@ -82,13 +84,5 @@ function HomeContent() {
         </div>
       </main>
     </div>
-  )
-}
-
-export default function Home() {
-  return (
-    <ModeProvider>
-      <HomeContent />
-    </ModeProvider>
   )
 }
