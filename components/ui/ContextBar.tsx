@@ -29,14 +29,27 @@ interface ContextBarProps {
  */
 export function ContextBar({ items, visible = true, className = '', actionSlot }: ContextBarProps) {
   const reduceMotion = useReducedMotion()
+  
+  const animDuration = reduceMotion ? 0 : duration.base
+  const exitDuration = reduceMotion ? 0 : duration.fast
 
   return (
     <AnimatePresence>
       {visible && items.length > 0 && (
         <motion.div
-          initial={{ opacity: 0, y: 6, scale: 0.99 }}
-          animate={{ opacity: 1, y: 0, scale: 1, transition: { duration: reduceMotion ? 0 : 0.22, ease: 'easeOut' } }}
-          exit={{ opacity: 0, y: 6, scale: 0.98, transition: { duration: reduceMotion ? 0 : 0.18, ease: 'easeIn' } }}
+          initial={{ opacity: 0, y: distance.sm, scale: 0.99 }}
+          animate={{ 
+            opacity: 1, 
+            y: 0, 
+            scale: 1, 
+            transition: { duration: animDuration, ease: easing.easeOut } 
+          }}
+          exit={{ 
+            opacity: 0, 
+            y: distance.sm, 
+            scale: 0.98, 
+            transition: { duration: exitDuration, ease: easing.easeOut } 
+          }}
           className={`pointer-events-none flex justify-center ${className}`}
         >
           <div className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-white/80 dark:bg-gray-950/80 backdrop-blur-2xl border border-white/50 dark:border-gray-800/70 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.45)] px-3 py-2">
