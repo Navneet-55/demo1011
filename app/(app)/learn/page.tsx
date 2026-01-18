@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/primitives'
 import { ContextBar } from '@/components/ui'
 import type { ContextBarItem } from '@/components/ui/ContextBar'
 import { Drawer } from '@/components/ui'
+import { CommandPalette } from '@/components/CommandPalette'
 import { Chip } from '@/components/ui/primitives'
 import { KnowledgeGraphVisualizer } from '@/components/KnowledgeGraphVisualizer'
 import { PracticePanel } from '@/components/PracticePanel'
@@ -39,6 +40,7 @@ export default function LearnPage() {
   const [isInsightsOpen, setIsInsightsOpen] = useState(false)
   const [activeInsightTab, setActiveInsightTab] = useState<string>('')
   const [metadata, setMetadata] = useState<ResponseMetadata | null>(null)
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false)
 
   const handleSubmit = async () => {
     if (!input.trim() || isLoading) return
