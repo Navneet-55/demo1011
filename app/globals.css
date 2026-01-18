@@ -5,6 +5,23 @@
 :root {
   --background: #ffffff;
   --foreground: #0a0a0a;
+  
+  /* Apple-style Motion Tokens */
+  --motion-duration-instant: 120ms;
+  --motion-duration-fast: 160ms;
+  --motion-duration-base: 220ms;
+  --motion-duration-slow: 280ms;
+  
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-out-soft: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --motion-ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --motion-ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);
+  
+  --motion-distance-xs: 4px;
+  --motion-distance-sm: 6px;
+  --motion-distance-md: 10px;
+  --motion-distance-lg: 16px;
+  --motion-distance-xl: 32px;
 }
 
 .dark {
@@ -37,6 +54,23 @@ html { scroll-behavior: smooth; }
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+  
+  /* Disable all animations for accessibility */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  /* Override motion tokens */
+  :root {
+    --motion-duration-instant: 0ms;
+    --motion-duration-fast: 0ms;
+    --motion-duration-base: 0ms;
+    --motion-duration-slow: 0ms;
+  }
 }
 
 /* Custom scrollbar */
