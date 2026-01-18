@@ -33,9 +33,7 @@ function ModeDemoSection() {
   }
 
   return (
-    <Section className="bg-gray-50 dark:bg-gray-900/50">
-      <Container size="lg">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Mode Selector */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -167,8 +165,7 @@ function ModeDemoSection() {
             </Card>
           </motion.div>
         </div>
-      </Container>
-    </Section>
+    </div>
   )
 }
 
@@ -177,9 +174,7 @@ function HybridDemoSection() {
   const [isOnline, setIsOnline] = useState(true)
 
   return (
-    <Section className="border-t border-gray-200 dark:border-gray-800">
-      <Container size="lg">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center border-t border-gray-200 dark:border-gray-800 pt-12">
           {/* Text Content */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -263,8 +258,7 @@ function HybridDemoSection() {
             </Card>
           </motion.div>
         </div>
-      </Container>
-    </Section>
+    </div>
   )
 }
 export default function LandingPage() {
