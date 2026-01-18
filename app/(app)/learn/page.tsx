@@ -45,6 +45,8 @@ export default function LearnPage() {
     
     setIsLoading(true)
     setOutput('')
+    setMetadata(null)
+    // Note: knowledge graph is managed by context; no explicit reset here to preserve history
     
     try {
       const response = await fetch('/api/explain', {
@@ -66,13 +68,60 @@ export default function LearnPage() {
 
       if (!reader) throw new Error('Response body not readable')
 
-      let accumulated = ''
+      let textBuffer = ''
+
+      const consumeMarker = (
+        buffer: string,
+        startToken: string,
+        endToken: string,
+        onPayload: (payload: string) => void
+      ) => {
+        let startIdx = buffer.indexOf(startToken)
+        let working = buffer
+
+        while (startIdx !== -1) {
+          const endIdx = working.indexOf(endToken, startIdx + startToken.length)
+          if (endIdx === -1) break
+          const payload = working.slice(startIdx + startToken.length, endIdx)
+          onPayload(payload)
+          working = working.slice(0, startIdx) + working.slice(endIdx + endToken.length)
+          startIdx = working.indexOf(startToken)
+        }
+
+        return working
+      }
+
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
-        
-        accumulated += decoder.decode(value, { stream: true })
-        setOutput(accumulated)
+
+        let chunk = decoder.decode(value, { stream: true })
+
+        // Extract trace (unused for now), graph, and metadata markers from stream
+        chunk = consumeMarker(chunk, '__TRACE__', '__TRACE__', () => {})
+
+        chunk = consumeMarker(chunk, '__GRAPH__', '__GRAPH__', (payload) => {
+          try {
+            const graph = JSON.parse(payload)
+            if (graph && addGraph) {
+              addGraph(graph)
+            }
+          } catch (err) {
+            console.error('Failed to parse knowledge graph payload', err)
+          }
+        })
+
+        chunk = consumeMarker(chunk, '__META__', '__META__', (payload) => {
+          try {
+            const meta = JSON.parse(payload) as ResponseMetadata
+            setMetadata(meta)
+          } catch (err) {
+            console.error('Failed to parse metadata payload', err)
+          }
+        })
+
+        textBuffer += chunk
+        setOutput(textBuffer)
       }
     } catch (error) {
       console.error('Error:', error)
