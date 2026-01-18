@@ -18,7 +18,7 @@ export default function LearnPage() {
   const [input, setInput] = useState('')
   const [output, setOutput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [cognitiveLoad, setCognitiveLoad] = useState<CognitiveLoadMode>('student')
+  const [cognitiveLoad, setCognitiveLoad] = useState<CognitiveLoadMode>('balanced')
 
   const handleSubmit = async () => {
     if (!input.trim() || isLoading) return
