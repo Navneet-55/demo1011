@@ -425,7 +425,7 @@ export default function LearnPage() {
 
             <div className="flex-1 min-h-[400px] overflow-hidden rounded-2xl border border-white/40 dark:border-gray-800/70 bg-white/70 dark:bg-gray-950/70 backdrop-blur-xl p-4 shadow-inner">
               <AnimatePresence mode="wait">
-                {insightTabs.map((tab) => (
+                {insightTabs.map((tab) =>
                   tab.id === activeInsightTab ? (
                     <motion.div
                       key={tab.id}
@@ -438,7 +438,7 @@ export default function LearnPage() {
                       {tab.content}
                     </motion.div>
                   ) : null
-                ))}
+                )}
               </AnimatePresence>
             </div>
           </div>
