@@ -1,135 +1,560 @@
-"use client"
+'use client'
 
 import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { MarketingSubNav } from '@/components/marketing/MarketingSubNav'
-import { Hero } from '@/components/marketing/Hero'
-import { HighlightsGrid } from '@/components/marketing/HighlightsGrid'
-import { CompareBlock } from '@/components/marketing/CompareBlock'
-import { StickyMediaSection } from '@/components/marketing/StickyMediaSection'
 import { VideoModal } from '@/components/marketing/VideoModal'
-import { Container, Button, Card, typography } from '@/components/ui/primitives'
+import { Container, Section, Card, Button, Badge, typography } from '@/components/ui/primitives'
+import type { Mode } from '@/components/ModeProvider'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
-export default function MarketingPage() {
+// Interactive demo components
+function ModeDemoSection() {
+  const [selectedMode, setSelectedMode] = useState<Mode>('Student')
+  
+  const modeDescriptions: Record<Mode, { title: string; description: string; icon: string }> = {
+    Beginner: {
+      title: 'Explain Like I\'m 5',
+      description: 'Simple analogies, everyday language, step-by-step guidance. Perfect for learning new concepts from scratch.',
+      icon: '🌱'
+    },
+    Student: {
+      title: 'Balanced Learning',
+      description: 'Clear explanations with moderate detail. Ideal for students wanting to understand the "why" behind concepts.',
+      icon: '📚'
+    },
+    Pro: {
+      title: 'Deep Technical Dive',
+      description: 'In-depth technical analysis, edge cases, optimization tips. For mastery and production expertise.',
+      icon: '⚙️'
+    }
+  }
+
+  return (
+    <Section className="bg-gray-50 dark:bg-gray-900/50">
+      <Container size="lg">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Mode Selector */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className={`${typography.h2} mb-6`}>Adaptive Learning Modes</h2>
+            <p className={`${typography.lead} mb-8`}>
+              Choose how you want to learn. GyaanForge adapts its explanations to match your skill level.
+            </p>
+
+            {/* Mode Toggle */}
+            <div className="flex gap-2 mb-8 bg-white dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700 w-fit">
+              {(Object.keys(modeDescriptions) as Mode[]).map((mode) => (
+                <motion.button
+                  key={mode}
+                  onClick={() => setSelectedMode(mode)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                    selectedMode === mode
+                      ? 'bg-black text-white dark:bg-white dark:text-black'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  {mode}
+                </motion.button>
+              ))}
+            </div>
+
+            {/* Mode Description */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedMode}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700"
+              >
+                <div className="flex items-start gap-4">
+                  <span className="text-4xl">{modeDescriptions[selectedMode].icon}</span>
+                  <div>
+                    <h3 className={`${typography.h4} mb-2`}>{modeDescriptions[selectedMode].title}</h3>
+                    <p className={typography.body}>{modeDescriptions[selectedMode].description}</p>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Sample Explanation Preview */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+          >
+              <Card variant="glass" className="p-6 min-h-96">
+              <div className="flex items-center gap-2 mb-4">
+                <Badge variant="default">Sample Response</Badge>
+                <Badge variant="success">Live Preview</Badge>
+              </div>
+              
+              <AnimatePresence mode="wait">
+                {selectedMode === 'Beginner' && (
+                  <motion.div
+                    key="beginner"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-3"
+                  >
+                    <h4 className={`${typography.h4}`}>What is async/await?</h4>
+                    <p className={typography.body}>
+                      Think of it like ordering pizza. You place the order (async) and continue watching TV while waiting. When the pizza arrives (await), you get it. You don&apos;t have to stare at the door! 🍕
+                    </p>
+                    <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-lg border-l-4 border-blue-500">
+                      <p className={`${typography.small}`}><strong>Key idea:</strong> Let JavaScript keep working while waiting for results.</p>
+                    </div>
+                  </motion.div>
+                )}
+                
+                {selectedMode === 'Student' && (
+                  <motion.div
+                    key="student"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-3"
+                  >
+                    <h4 className={`${typography.h4}`}>What is async/await?</h4>
+                    <p className={typography.body}>
+                      Async/await is syntactic sugar over Promises that lets you write asynchronous code that looks synchronous. It makes handling concurrent operations cleaner and more readable.
+                    </p>
+                    <code className="text-xs bg-gray-900 text-gray-100 p-2 rounded block whitespace-pre-wrap">
+{`const data = await fetchData();
+// Code waits here until Promise resolves`}
+                    </code>
+                    <p className={`${typography.small}`}><strong>Why use it?</strong> Better readability than promise chains; easier error handling with try/catch.</p>
+                  </motion.div>
+                )}
+                
+                {selectedMode === 'Pro' && (
+                  <motion.div
+                    key="pro"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-3"
+                  >
+                    <h4 className={`${typography.h4}`}>What is async/await?</h4>
+                    <p className={typography.body}>
+                      Async/await is a syntactic abstraction over Promises that uses generator-like semantics. When you await a Promise, control is suspended until resolution, enabling sequential composition of concurrent operations.
+                    </p>
+                    <code className="text-xs bg-gray-900 text-gray-100 p-2 rounded block whitespace-pre-wrap">
+{`async fn() => {
+  const [a, b] = await Promise.all([fetch1(), fetch2()]);
+  // Parallel execution with sequential syntax
+}`}
+                    </code>
+                    <div className="space-y-1 text-xs">
+                      <p><strong>Performance:</strong> Zero overhead vs Promise.then(); compiled to identical bytecode.</p>
+                      <p><strong>Gotcha:</strong> Sequential awaits don&apos;t parallelize. Use Promise.all() for concurrent ops.</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </Card>
+          </motion.div>
+        </div>
+      </Container>
+    </Section>
+  )
+}
+
+// Hybrid Intelligence Demo
+function HybridDemoSection() {
+  const [isOnline, setIsOnline] = useState(true)
+
+  return (
+    <Section className="border-t border-gray-200 dark:border-gray-800">
+      <Container size="lg">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Text Content */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className={`${typography.h2} mb-6`}>Online/Offline Hybrid</h2>
+            <p className={`${typography.lead} mb-8`}>
+              Never lose access. GyaanForge works online with streaming AI, and offline with smart local patterns.
+            </p>
+
+            <div className="space-y-4 mb-8">
+              <Card>
+                <Badge variant="success" className="mb-3">🌐 Online Mode</Badge>
+                <h4 className={`${typography.h4} mb-2`}>Streaming AI Explanations</h4>
+                <p className={typography.body}>Connected to Groq for real-time, token-by-token streaming explanations.</p>
+              </Card>
+
+              <Card>
+                <Badge variant="warning" className="mb-3">📡 Offline Mode</Badge>
+                <h4 className={`${typography.h4} mb-2`}>Local Pattern Matching</h4>
+                <p className={typography.body}>Use built-in knowledge for common errors, concepts, and questions.</p>
+              </Card>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsOnline(!isOnline)}
+                className={`px-6 py-3 rounded-xl font-medium transition-all ${
+                  isOnline
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-amber-600 text-white'
+                }`}
+              >
+                {isOnline ? '🌐 Switch to Offline' : '📡 Switch to Online'}
+              </motion.button>
+              <span className={typography.small}>
+                Currently: {isOnline ? 'Online' : 'Offline'}
+              </span>
+            </div>
+          </motion.div>
+
+          {/* Demo Card */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+          >
+            <Card variant={isOnline ? 'glass' : 'default'} className="p-8 min-h-96 flex flex-col justify-between border-l-4 border-amber-600">
+              <div>
+                <Badge variant={isOnline ? 'success' : 'warning'} className="mb-4">
+                  {isOnline ? '🌐 Online' : '📡 Offline'}
+                </Badge>
+                <h3 className={`${typography.h3} mb-4`}>
+                  {isOnline ? 'AI-Powered' : 'Local Pattern'}
+                </h3>
+                <p className={typography.body}>
+                  {isOnline
+                    ? 'Real-time streaming from advanced LLMs. Intelligent routing based on query complexity. Fallback to local when offline.'
+                    : 'Lightning-fast local inference. Pattern-based responses for common questions. Zero latency, no API calls needed.'}
+                </p>
+              </div>
+              
+              <motion.div
+                animate={{ y: isOnline ? 0 : 10 }}
+                className="mt-8 p-4 bg-gray-900/10 dark:bg-white/5 rounded-lg border border-gray-200/50 dark:border-white/10"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl">{isOnline ? '✨' : '⚡'}</span>
+                  <span className={typography.small}>
+                    {isOnline ? 'Streaming response...' : 'Instant response'}
+                  </span>
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  {isOnline ? 'Token-by-token delivery' : 'Cached pattern match'}
+                </div>
+              </motion.div>
+            </Card>
+          </motion.div>
+        </div>
+      </Container>
+    </Section>
+  )
+}
+export default function LandingPage() {
   const [isVideoOpen, setIsVideoOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
+    <div className="min-h-screen bg-white dark:bg-gray-950 overflow-hidden">
       <MarketingSubNav />
       
-      <Hero
-        onPrimaryCTA={() => window.location.href = '/learn'}
-        onSecondaryCTA={() => setIsVideoOpen(true)}
-      />
-      
-      <HighlightsGrid />
-      
-      <CompareBlock />
-      
-      <StickyMediaSection
-        id="hybrid"
-        title="Hybrid intelligence."
-        subtitle="The best of both worlds: online AI with offline resilience."
-        chapters={[
-          {
-            title: 'Online AI First',
-            description: 'Connect to Groq for blazing-fast inference with state-of-the-art models when online.',
-          },
-          {
-            title: 'Offline Fallback',
-            description: 'Automatic failover to cached responses and local processing when offline.',
-          },
-          {
-            title: 'Seamless Transition',
-            description: 'No interruption to your workflow. The system handles mode switching transparently.',
-          },
-        ]}
-      />
+      {/* HERO - Full Viewport */}
+      <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden bg-white dark:bg-gray-950">
+        {/* Animated background */}
+        <motion.div
+          animate={{ backgroundPosition: ['0% 0%', '100% 100%'] }}
+          transition={{ duration: 20, repeat: Infinity, repeatType: 'reverse' }}
+          className="absolute inset-0 opacity-30 dark:opacity-10"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.2), transparent 50%), radial-gradient(circle at 80% 80%, rgba(147, 51, 234, 0.2), transparent 50%)',
+            backgroundSize: '200% 200%',
+          }}
+        />
 
-      <StickyMediaSection
-        id="architecture"
-        title="Built to scale."
-        subtitle="Enterprise-grade architecture with TypeScript, Next.js 14, and modern patterns."
-        chapters={[
-          {
-            title: 'Type-Safe',
-            description: 'Full TypeScript coverage with strict mode, Zod validation, and compile-time safety.',
-          },
-          {
-            title: 'Performant',
-            description: 'Streaming responses, optimistic UI, and intelligent caching for instant interactions.',
-          },
-          {
-            title: 'Accessible',
-            description: 'WCAG 2.1 AA compliant with keyboard navigation, screen reader support, and reduced motion respect.',
-          },
-        ]}
-      />
+        <Container size="xl" className="relative z-10 py-32">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center max-w-5xl mx-auto"
+          >
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="mb-8 flex justify-center"
+            >
+              <Badge variant="gradient">✨ The Future of Learning is Here</Badge>
+            </motion.div>
 
-      <section id="performance" className="py-16 sm:py-24 bg-gray-50 dark:bg-gray-900/50">
-        <Container>
-          <div className="text-center mb-12">
-            <h2 className={typography.h2}>Performance that matters.</h2>
-            <p className={`${typography.lead} mt-4`}>
-              Built for speed, reliability, and scale.
-            </p>
-          </div>
+            {/* Main Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.8 }}
+              className="text-7xl md:text-8xl lg:text-9xl font-black leading-tight mb-8 bg-gradient-to-r from-gray-900 via-blue-600 to-purple-600 dark:from-white dark:via-blue-400 dark:to-purple-400 bg-clip-text text-transparent"
+            >
+              Learn Smarter<br />Not Harder
+            </motion.h1>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { metric: '<100ms', label: 'UI Response Time', desc: 'Instant feedback on every interaction' },
-              { metric: '99.9%', label: 'Uptime SLA', desc: 'Enterprise-grade reliability' },
-              { metric: '24/7', label: 'Offline Ready', desc: 'Learn anywhere, anytime' },
-            ].map((stat) => (
-              <Card key={stat.label} variant="bordered" className="text-center">
-                <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                  {stat.metric}
+            {/* Subheading */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.8 }}
+              className="text-2xl md:text-3xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto mb-12 leading-relaxed font-light"
+            >
+              AI that adapts to you. Real-time explanations. Works offline. Always with you.
+            </motion.p>
+
+            {/* CTA Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.8 }}
+              className="flex flex-col sm:flex-row gap-6 justify-center mb-16"
+            >
+              <Link href="/learn">
+                <Button variant="primary" size="lg" className="px-12 py-4 text-lg">
+                  Try for Free
+                </Button>
+              </Link>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsVideoOpen(true)}
+                className="px-12 py-4 text-lg font-semibold rounded-2xl border-2 border-gray-900 dark:border-white text-gray-900 dark:text-white hover:bg-gray-900/5 dark:hover:bg-white/5 transition-all"
+              >
+                Watch Demo
+              </motion.button>
+            </motion.div>
+          </motion.div>
+
+          {/* Hero Video Placeholder */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9, duration: 0.8 }}
+            className="mt-12"
+          >
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              className="relative w-full aspect-video bg-gradient-to-br from-blue-600 to-purple-600 rounded-3xl overflow-hidden shadow-2xl cursor-pointer group"
+              onClick={() => setIsVideoOpen(true)}
+            >
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center"
+                  >
+                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
+                      <svg className="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </motion.div>
+                  <p className="text-white text-xl font-semibold">Watch the Magic</p>
                 </div>
-                <h3 className="font-semibold mb-2">{stat.label}</h3>
-                <p className={typography.small}>{stat.desc}</p>
-              </Card>
+              </div>
+              <motion.div
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                animate={{ backgroundPosition: ['0% 0%', '100% 100%'] }}
+                transition={{ duration: 3, repeat: Infinity, repeatType: 'reverse' }}
+                style={{
+                  backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1), transparent)',
+                  backgroundSize: '200% 200%',
+                }}
+              />
+            </motion.div>
+          </motion.div>
+        </Container>
+      </section>
+
+      {/* SPACER - Massive whitespace */}
+      <section className="h-32 md:h-48" />
+
+      {/* FEATURES - Simplified to 4 key ones */}
+      <Section id="highlights" className="py-32">
+        <Container size="lg">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24"
+          >
+            <div>
+              <div className="text-6xl md:text-7xl font-black mb-8 text-gray-900 dark:text-white">
+                Adapts to You
+              </div>
+              <p className={`${typography.h4} text-gray-700 dark:text-gray-300 leading-relaxed`}>
+                Whether you&apos;re learning your first concept or mastering advanced topics, GyaanForge adjusts in real-time. Beginner mode? Complex technical deep-dive? We&apos;ve got you.
+              </p>
+            </div>
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="aspect-square bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-3xl flex items-center justify-center text-8xl"
+            >
+              🎯
+            </motion.div>
+          </motion.div>
+        </Container>
+      </Section>
+
+      {/* SPACER */}
+      <section className="h-32 md:h-48" />
+
+      {/* MODES - Interactive */}
+      <Section id="modes" className="py-32 bg-gray-50 dark:bg-gray-900/50">
+        <Container size="lg">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <div className="text-6xl md:text-7xl font-black mb-16 text-gray-900 dark:text-white">
+              Choose Your Path
+            </div>
+          </motion.div>
+
+          <ModeDemoSection />
+        </Container>
+      </Section>
+
+      {/* SPACER */}
+      <section className="h-32 md:h-48" />
+
+      {/* HYBRID - Interactive */}
+      <Section id="hybrid" className="py-32">
+        <Container size="lg">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <div className="text-6xl md:text-7xl font-black mb-16 text-gray-900 dark:text-white">
+              Always Connected
+            </div>
+          </motion.div>
+
+          <HybridDemoSection />
+        </Container>
+      </Section>
+
+      {/* SPACER */}
+      <section className="h-32 md:h-48" />
+
+      {/* STATS - Bold display */}
+      <Section id="performance" className="py-32 bg-gray-900 dark:bg-black">
+        <Container size="lg">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-20"
+          >
+            <h2 className="text-6xl md:text-7xl font-black text-white mb-6">Built for You</h2>
+            <p className="text-2xl text-gray-300 max-w-2xl mx-auto">Enterprise-grade performance, simplified.</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {[
+              { label: 'Response Time', value: '<500ms', icon: '⚡' },
+              { label: 'Learning Modes', value: '3', icon: '🎯' },
+              { label: 'Offline Ready', value: '100%', icon: '📡' },
+              { label: 'WCAG AA', value: 'Certified', icon: '♿' },
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="text-center p-8"
+              >
+                <div className="text-6xl mb-4">{stat.icon}</div>
+                <div className="text-5xl font-black text-white mb-2">{stat.value}</div>
+                <div className="text-xl text-gray-400">{stat.label}</div>
+              </motion.div>
             ))}
           </div>
         </Container>
-      </section>
+      </Section>
 
-      <section id="docs" className="py-16 sm:py-24">
-        <Container className="text-center">
-          <h2 className={typography.h2}>Ready to explore?</h2>
-          <p className={`${typography.lead} mt-4 mb-8`}>
-            Comprehensive documentation and guides to get you started.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <Button variant="secondary" size="lg">
-              View Documentation
-            </Button>
-            <Button variant="ghost" size="lg">
-              API Reference
-            </Button>
+      {/* SPACER */}
+      <section className="h-32 md:h-48" />
+
+      {/* FINAL CTA */}
+      <Section className="py-32">
+        <Container size="lg">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="text-center bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-900 dark:to-purple-900 rounded-3xl p-16 md:p-24"
+          >
+            <h2 className="text-5xl md:text-6xl font-black text-white mb-8">
+              Ready?
+            </h2>
+            <p className="text-xl text-white/90 mb-12 max-w-2xl mx-auto">
+              Experience adaptive learning that works for your brain, not against it.
+            </p>
+            <Link href="/learn">
+              <Button 
+                variant="primary" 
+                size="lg"
+                className="bg-white text-blue-600 hover:bg-gray-100 dark:bg-white dark:text-blue-900 px-12 py-4 text-lg"
+              >
+                Start Learning Now
+              </Button>
+            </Link>
+          </motion.div>
+        </Container>
+      </Section>
+
+      {/* SPACER */}
+      <section className="h-16 md:h-32" />
+
+      {/* Footer - Minimal */}
+      <footer className="border-t border-gray-200 dark:border-gray-800 py-16 bg-white dark:bg-gray-950">
+        <Container size="lg">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                © 2024 GyaanForge. Learning reimagined.
+              </p>
+            </div>
+            <div className="flex gap-8 text-sm">
+              <a href="#" className="text-blue-600 hover:underline">Docs</a>
+              <a href="#" className="text-blue-600 hover:underline">Community</a>
+              <a href="#" className="text-blue-600 hover:underline">Twitter</a>
+            </div>
           </div>
         </Container>
-      </section>
+      </footer>
 
-      <section id="try" className="py-16 sm:py-24 bg-black text-white">
-        <Container className="text-center">
-          <h2 className={`${typography.h2} text-white mb-6`}>
-            Start learning smarter today.
-          </h2>
-          <p className="text-lg text-gray-300 mb-10 max-w-2xl mx-auto">
-            Join thousands of learners mastering new skills with GyaanForge&apos;s adaptive AI companion.
-          </p>
-          <Button
-            variant="primary"
-            size="lg"
-            className="bg-white text-black hover:bg-gray-100"
-            onClick={() => window.location.href = '/learn'}
-          >
-            Try GyaanForge Free
-          </Button>
-        </Container>
-      </section>
-
+      {/* Video Modal */}
       <VideoModal isOpen={isVideoOpen} onClose={() => setIsVideoOpen(false)} />
     </div>
   )
