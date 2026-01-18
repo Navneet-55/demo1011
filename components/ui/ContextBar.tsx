@@ -3,6 +3,7 @@
 import React from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Chip } from './primitives'
+import { duration, easing, distance, scale } from '@/lib/motion/tokens'
 
 export type ContextBarItem = {
   id: string
