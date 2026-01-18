@@ -21,8 +21,12 @@ const container = {
   },
 }
 const itemVariant = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  hidden: { opacity: 0, y: 24 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45 },
+  },
 }
 
 export function Highlights() {
@@ -43,7 +47,7 @@ export function Highlights() {
           variants={container}
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, margin: '-10% 0% -10% 0%' }}
+          viewport={{ once: true, margin: '-20% 0% -20% 0%' }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10"
         >
           {items.map((it) => (

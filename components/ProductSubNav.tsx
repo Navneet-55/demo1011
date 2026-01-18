@@ -1,6 +1,8 @@
 "use client"
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React from 'react'
+import { useScroll } from './LenisProvider'
+import { useActiveSection } from '@/hooks/useActiveSection'
 
 const SECTIONS = [
   { id: 'overview', label: 'Overview' },
@@ -14,28 +16,26 @@ const SECTIONS = [
 ]
 
 export function ProductSubNav() {
-  const [activeId, setActiveId] = useState<string>('overview')
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => (a.boundingClientRect.top < b.boundingClientRect.top ? -1 : 1))
-        if (visible[0]) setActiveId(visible[0].target.id)
-      },
-      { rootMargin: '-40% 0px -50% 0px', threshold: 0.01 }
-    )
-    SECTIONS.forEach((s) => {
-      const el = document.getElementById(s.id)
-      if (el) observer.observe(el)
-    })
-    return () => observer.disconnect()
-  }, [])
+  const { lenis, offset } = useScroll()
+  const activeId = useActiveSection(SECTIONS.map((s) => s.id), {
+    rootMargin: '-50% 0px -50% 0px',
+    threshold: [0, 0.25, 0.5, 0.75, 1],
+    strategy: 'center',
+  })
 
   const handleClick = (id: string) => {
     const el = document.getElementById(id)
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (!el) return
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (lenis && !prefersReduced) {
+      lenis.scrollTo(el, {
+        offset,
+        duration: 1.0,
+        easing: (t: number) => 1 - Math.pow(1 - t, 3),
+      })
+    } else {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   }
 
   return (

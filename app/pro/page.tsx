@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect } from 'react'
+import React from 'react'
 import { GlobalNav } from '@/components/GlobalNav'
 import { ProductSubNav } from '@/components/ProductSubNav'
 import { Hero } from '@/components/Hero'
@@ -10,26 +10,13 @@ import { ColorPicker } from '@/components/ColorPicker'
 import { ZoomSelector } from '@/components/ZoomSelector'
 import { CompareCards } from '@/components/CompareCards'
 import { Footer } from '@/components/Footer'
-import Lenis from 'lenis'
+import { LenisProvider, useScroll } from '@/components/LenisProvider'
 
 export const dynamic = 'force-dynamic'
 
-export default function Page() {
-  useEffect(() => {
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (prefersReduced) return
-    const lenis = new Lenis({ lerp: 0.08, smoothWheel: true })
-    let rafId: number
-    const raf = (time: number) => {
-      lenis.raf(time)
-      rafId = requestAnimationFrame(raf)
-    }
-    rafId = requestAnimationFrame(raf)
-    return () => {
-      cancelAnimationFrame(rafId)
-      lenis.destroy()
-    }
-  }, [])
+function ProContent() {
+  const { lenis, offset } = useScroll()
+  const prefersReduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
@@ -37,8 +24,19 @@ export default function Page() {
       <ProductSubNav />
 
       <section id="overview">
-        <Hero onPrimary={() => document.getElementById('specs')?.scrollIntoView({ behavior: 'smooth' })} />
+        <Hero
+          onPrimary={() => {
+            const el = document.getElementById('specs')
+            if (!el) return
+            if (lenis && !prefersReduced) {
+              lenis.scrollTo(el, { offset, duration: 1.0 })
+            } else {
+              el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }
+          }}
+        />
       </section>
+
       <section id="highlights">
         <Highlights />
       </section>
@@ -134,5 +132,13 @@ export default function Page() {
 
       <Footer />
     </div>
+  )
+}
+
+export default function Page() {
+  return (
+    <LenisProvider>
+      <ProContent />
+    </LenisProvider>
   )
 }
