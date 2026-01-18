@@ -39,7 +39,7 @@ export function ProductSubNav() {
   }
 
   return (
-    <div className="sticky top-14 z-40 bg-white/90 dark:bg-gray-950/90 backdrop-blur border-b border-gray-200 dark:border-gray-800">
+    <div data-header className="sticky top-14 z-40 bg-white/90 dark:bg-gray-950/90 backdrop-blur border-b border-gray-200 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-3 h-12">
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">

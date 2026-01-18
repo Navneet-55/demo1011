@@ -137,7 +137,7 @@ function ProContent() {
 
 export default function Page() {
   return (
-    <LenisProvider offset={-72}>
+    <LenisProvider>
       <ProContent />
     </LenisProvider>
   )
