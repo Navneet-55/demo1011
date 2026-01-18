@@ -17,6 +17,7 @@ import { KnowledgeGraphVisualizer } from '@/components/KnowledgeGraphVisualizer'
 import { PracticePanel } from '@/components/PracticePanel'
 import { TracePanel } from '@/components/TracePanel'
 import { QuizFlow } from '@/components/QuizFlow'
+import { FeaturesSidebar } from '@/components/FeaturesSidebar'
 import type { CognitiveLoadMode } from '@/types'
 import { COGNITIVE_LOAD_CONFIG } from '@/lib/constants'
 import { useLearningSession } from '@/contexts/LearningSessionContext'
@@ -233,31 +234,6 @@ export default function LearnPage() {
   const insightTabs = useMemo(() => {
     const tabs: Array<{ id: string; label: string; content: React.ReactNode }> = []
 
-    if (output.trim().length > 0) {
-      tabs.push({
-        id: 'actions',
-        label: 'Actions',
-        content: (
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-2">
-              <Chip size="sm" variant="glass" onClick={() => setIsCommandPaletteOpen(true)}>Explain selection</Chip>
-              <Chip size="sm" variant="glass" onClick={() => setIsCommandPaletteOpen(true)}>Compare concepts</Chip>
-              <Chip size="sm" variant="glass" onClick={() => setIsCommandPaletteOpen(true)}>Learning path</Chip>
-              <Chip size="sm" variant="glass" onClick={() => setIsCommandPaletteOpen(true)}>Explain diff / PR</Chip>
-              <Chip size="sm" variant="glass" onClick={() => { setIsInsightsOpen(true); setActiveInsightTab('quiz') }}>Start quiz</Chip>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Chip size="sm" variant={state.futureYou ? 'solid' : 'glass'} active={state.futureYou} onClick={() => setFutureYou(!state.futureYou)}>Future-You</Chip>
-              <Chip size="sm" variant="glass" onClick={cyclePerspective}>Switch perspective</Chip>
-              <Chip size="sm" variant="glass" onClick={cycleTimebox}>Switch timebox</Chip>
-              <Chip size="sm" variant="glass" onClick={cycleCognitiveLoad}>Cognitive load</Chip>
-              <Chip size="sm" variant="glass" onClick={() => setIsCommandPaletteOpen(true)}>Open Vault</Chip>
-            </div>
-          </div>
-        ),
-      })
-    }
-
     if (currentGraph) {
       tabs.push({ id: 'graph', label: 'Graph', content: <div className="h-[70vh] min-h-[480px]"><KnowledgeGraphVisualizer /></div> })
     }
@@ -332,7 +308,21 @@ export default function LearnPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 max-w-[1600px] w-full mx-auto p-4 sm:p-6 lg:p-8 relative">
+      <div className="flex-1 flex flex-row max-w-[1600px] w-full mx-auto relative">
+        {/* Features Sidebar */}
+        <FeaturesSidebar
+          onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+          onOpenQuiz={() => {
+            setIsInsightsOpen(true)
+            setActiveInsightTab('quiz')
+          }}
+          cognitiveLoad={cognitiveLoad}
+          onCycleCognitiveLoad={cycleCognitiveLoad}
+          onCycleTimebox={cycleTimebox}
+          onCyclePerspective={cyclePerspective}
+        />
+
+        <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 sm:p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -403,6 +393,8 @@ export default function LearnPage() {
           </motion.button>
         )}
       </AnimatePresence>
+        </div>
+      </div>
 
       {/* Insights Drawer */}
       <Drawer
