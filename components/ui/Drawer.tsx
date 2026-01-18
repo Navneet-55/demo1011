@@ -8,6 +8,7 @@
 import React, { useEffect, useRef } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useEscapeKey } from '@/lib/keyboard-shortcuts'
+import { drawerRight, drawerLeft, duration, easing } from '@/lib/motion/tokens'
 
 interface DrawerProps {
   isOpen: boolean
@@ -122,6 +123,10 @@ export const Drawer = React.forwardRef<HTMLDivElement, DrawerProps>(
 
     const slideFrom = side === 'right' ? 32 : -32
     const radius = side === 'right' ? 'rounded-l-3xl' : 'rounded-r-3xl'
+    
+    // Use motion tokens with reduced motion support
+    const backdropDuration = reduceMotion ? 0 : duration.fast
+    const drawerDuration = reduceMotion ? 0 : duration.base
 
     return (
       <AnimatePresence>
@@ -130,8 +135,8 @@ export const Drawer = React.forwardRef<HTMLDivElement, DrawerProps>(
             <motion.div
               className="fixed inset-0 z-40 bg-black/50 dark:bg-black/70 backdrop-blur-md"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { duration: reduceMotion ? 0 : 0.18 } }}
-              exit={{ opacity: 0, transition: { duration: reduceMotion ? 0 : 0.18 } }}
+              animate={{ opacity: 1, transition: { duration: backdropDuration } }}
+              exit={{ opacity: 0, transition: { duration: backdropDuration } }}
               onClick={() => {
                 if (closeOnBackdrop) {
                   onClose()
@@ -144,8 +149,16 @@ export const Drawer = React.forwardRef<HTMLDivElement, DrawerProps>(
             <motion.aside
               ref={ref || drawerRef}
               initial={{ x: slideFrom, opacity: 0 }}
-              animate={{ x: 0, opacity: 1, transition: { duration: reduceMotion ? 0 : 0.22, ease: 'easeOut' } }}
-              exit={{ x: slideFrom, opacity: 0, transition: { duration: reduceMotion ? 0 : 0.18, ease: 'easeIn' } }}
+              animate={{ 
+                x: 0, 
+                opacity: 1, 
+                transition: { duration: drawerDuration, ease: easing.easeOut } 
+              }}
+              exit={{ 
+                x: slideFrom, 
+                opacity: 0, 
+                transition: { duration: backdropDuration, ease: easing.easeOut } 
+              }}
               className={`
                 fixed top-0 ${side === 'right' ? 'right-0' : 'left-0'} z-50
                 h-full max-h-screen flex flex-col

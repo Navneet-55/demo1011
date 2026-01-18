@@ -23,7 +23,7 @@ import { COGNITIVE_LOAD_CONFIG } from '@/lib/constants'
 import { useLearningSession } from '@/contexts/LearningSessionContext'
 import { useKnowledgeGraph } from '@/contexts/KnowledgeGraphContext'
 import type { ResponseMetadata } from '@/types/api-contract'
-import { gestures } from '@/lib/motion/tokens'
+import { gestures, tabSwap } from '@/lib/motion/tokens'
 
 export const dynamic = 'force-dynamic'
 
