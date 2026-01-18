@@ -110,3 +110,38 @@ export const typography = {
   body: 'text-base text-gray-600 dark:text-gray-400',
   small: 'text-sm text-gray-500 dark:text-gray-500',
 }
+
+export const Chip = React.forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    active?: boolean
+    variant?: 'ghost' | 'solid' | 'glass'
+    size?: 'sm' | 'md'
+    leading?: React.ReactNode
+    trailing?: React.ReactNode
+  }
+>(({ className = '', active = false, variant = 'glass', size = 'md', leading, trailing, children, ...props }, ref) => {
+  const variants = {
+    ghost: 'bg-transparent text-gray-800 dark:text-gray-100 hover:bg-gray-100/70 dark:hover:bg-gray-800/70 border border-transparent',
+    solid: 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 shadow-md shadow-black/10 hover:shadow-lg hover:-translate-y-[1px]',
+    glass: 'bg-white/70 dark:bg-gray-900/60 text-gray-900 dark:text-white backdrop-blur-xl border border-white/50 dark:border-gray-800/60 shadow-lg shadow-black/5 hover:shadow-xl hover:-translate-y-[1px]',
+  }
+
+  const sizes = {
+    sm: 'px-3 py-1 text-xs',
+    md: 'px-4 py-2 text-sm',
+  }
+
+  return (
+    <button
+      ref={ref}
+      className={`inline-flex items-center gap-2 rounded-full transition-all duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${active ? 'ring-1 ring-blue-500/30 dark:ring-blue-400/30' : ''} ${className}`}
+      {...props}
+    >
+      {leading && <span className="text-base leading-none">{leading}</span>}
+      <span className="whitespace-nowrap">{children}</span>
+      {trailing && <span className="text-sm leading-none">{trailing}</span>}
+    </button>
+  )
+})
+Chip.displayName = 'Chip'

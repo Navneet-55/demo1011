@@ -9,9 +9,10 @@ import { useTheme } from './ThemeProvider'
 type OutputPanelProps = {
   content: string
   isLoading: boolean
+  onScroll?: React.UIEventHandler<HTMLDivElement>
 }
 
-export function OutputPanel({ content, isLoading }: OutputPanelProps) {
+export function OutputPanel({ content, isLoading, onScroll }: OutputPanelProps) {
   const { theme } = useTheme()
   const wordCount = content ? content.split(/\s+/).filter(Boolean).length : 0
 
@@ -31,7 +32,10 @@ export function OutputPanel({ content, isLoading }: OutputPanelProps) {
         </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-6 rounded-xl border-2 border-gray-300 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 custom-scrollbar">
+      <div
+        className="flex-1 overflow-y-auto p-6 rounded-xl border-2 border-gray-300 dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 custom-scrollbar"
+        onScroll={onScroll}
+      >
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">

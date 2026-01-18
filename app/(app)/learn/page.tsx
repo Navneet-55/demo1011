@@ -8,18 +8,25 @@ import { OutputPanel } from '@/components/OutputPanel'
 import { useMode } from '@/components/ModeProvider'
 import { useOnlineOffline } from '@/contexts/OnlineOfflineContext'
 import { Badge, Button } from '@/components/ui/primitives'
+import { ContextBar } from '@/components/ui'
+import type { ContextBarItem } from '@/components/ui/ContextBar'
 import type { CognitiveLoadMode } from '@/types'
 import { COGNITIVE_LOAD_CONFIG } from '@/lib/constants'
+import { useLearningSession } from '@/contexts/LearningSessionContext'
 
 export const dynamic = 'force-dynamic'
 
 export default function LearnPage() {
   const { mode } = useMode()
   const { effectiveMode } = useOnlineOffline()
+  const { state, setTimebox, setPerspective, setFutureYou } = useLearningSession()
   const [input, setInput] = useState('')
   const [output, setOutput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [cognitiveLoad, setCognitiveLoad] = useState<CognitiveLoadMode>('balanced')
+  const [showContextBar, setShowContextBar] = useState(false)
+  const [contextBarHidden, setContextBarHidden] = useState(false)
+  const scrollHideTimer = useRef<NodeJS.Timeout | null>(null)
 
   const handleSubmit = async () => {
     if (!input.trim() || isLoading) return
@@ -76,6 +83,73 @@ export default function LearnPage() {
     a.click()
     URL.revokeObjectURL(url)
   }
+
+  // Floating context bar visibility based on content/streaming
+  useEffect(() => {
+    const hasContent = output.trim().length > 0
+    setShowContextBar(hasContent && !isLoading)
+  }, [output, isLoading])
+
+  // Auto-hide on scroll with gentle return
+  const handleOutputScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (scrollHideTimer.current) {
+      clearTimeout(scrollHideTimer.current)
+    }
+    setContextBarHidden(true)
+    scrollHideTimer.current = setTimeout(() => {
+      setContextBarHidden(false)
+    }, 900)
+  }
+
+  const cycleTimebox = () => {
+    const order: Array<typeof state.timebox> = ['30s', '2m', 'deep']
+    const idx = order.indexOf(state.timebox)
+    const next = order[(idx + 1) % order.length]
+    setTimebox(next)
+  }
+
+  const cyclePerspective = () => {
+    const order: Array<typeof state.perspective> = ['story', 'diagram', 'code', 'analogy', 'math']
+    const idx = order.indexOf(state.perspective)
+    const next = order[(idx + 1) % order.length]
+    setPerspective(next)
+  }
+
+  const contextItems: ContextBarItem[] = [
+    {
+      id: 'timebox',
+      label: state.timebox === '30s' ? '30s' : state.timebox === '2m' ? '2m' : 'Deep',
+      icon: '⏱️',
+      dropdown: true,
+      onClick: cycleTimebox,
+    },
+    {
+      id: 'perspective',
+      label: state.perspective.charAt(0).toUpperCase() + state.perspective.slice(1),
+      icon: '🎛️',
+      dropdown: true,
+      onClick: cyclePerspective,
+    },
+    {
+      id: 'future',
+      label: 'Future-You',
+      icon: state.futureYou ? '🚀' : '⏳',
+      active: state.futureYou,
+      onClick: () => setFutureYou(!state.futureYou),
+    },
+    {
+      id: 'practice',
+      label: 'Practice',
+      icon: '🎯',
+      onClick: () => {},
+    },
+    {
+      id: 'quiz',
+      label: 'Quiz',
+      icon: '🧠',
+      onClick: () => {},
+    },
+  ]
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-950">
@@ -142,11 +216,20 @@ export default function LearnPage() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
-          className="flex-1 min-w-0"
+          className="flex-1 min-w-0 relative"
         >
+          {/* Floating Context Bar */}
+          <div className="absolute -top-6 left-0 right-0 flex justify-center z-20">
+            <ContextBar
+              items={contextItems}
+              visible={showContextBar && !contextBarHidden}
+            />
+          </div>
+
           <OutputPanel
             content={output}
             isLoading={isLoading}
+            onScroll={handleOutputScroll}
           />
         </motion.div>
       </div>

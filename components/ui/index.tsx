@@ -8,6 +8,9 @@
 
 import React, { ReactNode } from 'react'
 export { Modal } from './Modal'
+export { Drawer } from './Drawer'
+export { ContextBar } from './ContextBar'
+export { Chip } from './primitives'
 
 // ============ SEGMENTED CONTROL ============
 
@@ -122,97 +125,6 @@ export function Tabs({
         )}
       </div>
     </div>
-  )
-}
-
-// ============ DRAWER ============
-
-export interface DrawerProps {
-  isOpen: boolean
-  onClose: () => void
-  title: string
-  children: ReactNode
-  side?: 'left' | 'right'
-  size?: 'sm' | 'md' | 'lg'
-}
-
-export function Drawer({
-  isOpen,
-  onClose,
-  title,
-  children,
-  side = 'right',
-  size = 'md',
-}: DrawerProps) {
-  const sizeClasses = {
-    sm: 'w-64',
-    md: 'w-96',
-    lg: 'w-[32rem]',
-  }
-
-  const sideClasses = {
-    left: 'left-0 rounded-r-lg',
-    right: 'right-0 rounded-l-lg',
-  }
-
-  React.useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isOpen])
-
-  return (
-    <>
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-200"
-          onClick={onClose}
-          aria-hidden="true"
-        />
-      )}
-
-      <div
-        className={`
-          fixed top-0 bottom-0 ${sideClasses[side]} ${sizeClasses[size]}
-          bg-white dark:bg-slate-900 shadow-xl z-50
-          transform transition-transform duration-200 flex flex-col
-          ${isOpen ? 'translate-x-0' : side === 'left' ? '-translate-x-full' : 'translate-x-full'}
-        `}
-        role="dialog"
-        aria-labelledby="drawer-title"
-      >
-        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
-          <h2 id="drawer-title" className="text-lg font-semibold">
-            {title}
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-            aria-label="Close drawer"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-4">{children}</div>
-      </div>
-
-      {/* Mobile drawer overlay adjustment */}
-      <style>{`
-        @media (max-width: 768px) {
-          .fixed {
-            width: 100% !important;
-            ${side === 'left' ? 'right: auto;' : 'left: auto;'}
-          }
-        }
-      `}</style>
-    </>
   )
 }
 
