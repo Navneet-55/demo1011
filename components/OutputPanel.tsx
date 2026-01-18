@@ -1,10 +1,12 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { useTheme } from './ThemeProvider'
+import { fadeUpSm } from '@/lib/motion/tokens'
 
 type OutputPanelProps = {
   content: string
@@ -48,7 +50,13 @@ export function OutputPanel({ content, isLoading, onScroll }: OutputPanelProps) 
             </div>
           </div>
         ) : content ? (
-          <div className="markdown-content prose dark:prose-invert max-w-none animate-fadeIn">
+          <motion.div
+            className="markdown-content prose dark:prose-invert max-w-none"
+            variants={fadeUpSm}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -78,7 +86,7 @@ export function OutputPanel({ content, isLoading, onScroll }: OutputPanelProps) 
             >
               {content}
             </ReactMarkdown>
-          </div>
+          </motion.div>
         ) : (
           <div className="flex items-center justify-center h-full text-gray-400 dark:text-gray-600">
             <div className="text-center max-w-md">
