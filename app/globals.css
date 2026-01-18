@@ -6,6 +6,15 @@
   --background: #ffffff;
   --foreground: #0a0a0a;
   
+  /* Liquid Glass */
+  --liquid-glass-light: rgba(255, 255, 255, 0.7);
+  --liquid-glass-dark: rgba(17, 17, 17, 0.7);
+  
+  /* Apple accent colors */
+  --accent-orange: #ff9500;
+  --accent-blue: #007aff;
+  --accent-green: #34c759;
+  
   /* Apple-style Motion Tokens */
   --motion-duration-instant: 120ms;
   --motion-duration-fast: 160ms;
@@ -221,7 +230,50 @@ code {
   @apply rounded px-1 py-0.5 text-sm;
 }
 
-/* Markdown styling */
+/* Liquid Glass Component */
+@layer components {
+  .liquid-glass {
+    @apply backdrop-blur-xl bg-white/70 dark:bg-gray-900/70 border border-white/20 dark:border-white/10 rounded-3xl;
+    /* Create the liquid glass effect */
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .liquid-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+    border-radius: inherit;
+  }
+  
+  .liquid-glass-sm {
+    @apply backdrop-blur-lg bg-white/60 dark:bg-gray-900/60 border border-white/20 dark:border-white/10 rounded-2xl;
+  }
+  
+  .liquid-glass-lg {
+    @apply backdrop-blur-2xl bg-white/80 dark:bg-gray-900/80 border border-white/30 dark:border-white/15 rounded-3xl;
+  }
+}
+
+/* Apple-style text hierarchy */
+@layer components {
+  .text-apple-headline {
+    @apply text-4xl sm:text-5xl font-semibold tracking-tight;
+  }
+  
+  .text-apple-subheadline {
+    @apply text-xl sm:text-2xl font-medium text-gray-600 dark:text-gray-400;
+  }
+  
+  .text-apple-caption {
+    @apply text-sm text-gray-500 dark:text-gray-400;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+}
 .markdown-content h1,
 .markdown-content h2,
 .markdown-content h3 {

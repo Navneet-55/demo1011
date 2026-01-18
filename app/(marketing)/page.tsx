@@ -4,68 +4,108 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MarketingSubNav } from '@/components/marketing/MarketingSubNav'
 import { VideoModal } from '@/components/marketing/VideoModal'
-import { Container, Section, Card, Button, Badge, typography } from '@/components/ui/primitives'
-import type { Mode } from '@/components/ModeProvider'
 import Link from 'next/link'
 import { Hero } from '@/components/marketing/Hero'
 
 export const dynamic = 'force-dynamic'
 
-// Interactive demo components
+// Apple-style section wrapper
+const Section = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <section className={`py-20 px-4 sm:px-6 lg:px-8 ${className}`}>
+    <div className="max-w-7xl mx-auto">
+      {children}
+    </div>
+  </section>
+)
+
+// Feature card with liquid glass
+const FeatureCard = ({ icon, title, description }: { icon: string; title: string; description: string }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.6 }}
+    className="liquid-glass p-8 group hover:scale-105 transition-transform duration-300"
+  >
+    <div className="text-4xl mb-4">{icon}</div>
+    <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">{title}</h3>
+    <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{description}</p>
+  </motion.div>
+)
+
+// Interactive demo component
 function ModeDemoSection() {
-  const [selectedMode, setSelectedMode] = useState<Mode>('Student')
+  const [selectedMode, setSelectedMode] = useState<'Beginner' | 'Student' | 'Pro'>('Student')
   
-  const modeDescriptions: Record<Mode, { title: string; description: string; icon: string }> = {
+  const modes = {
     Beginner: {
       title: 'Explain Like I\'m 5',
-      description: 'Simple analogies, everyday language, step-by-step guidance. Perfect for learning new concepts from scratch.',
-      icon: '🌱'
+      description: 'Simple analogies and everyday language to understand any concept from scratch.',
+      icon: '🌱',
+      demo: 'async/await is like ordering pizza. You place the order and continue your day. When it arrives, you get it. No need to stare at the door! 🍕'
     },
     Student: {
       title: 'Balanced Learning',
-      description: 'Clear explanations with moderate detail. Ideal for students wanting to understand the "why" behind concepts.',
-      icon: '📚'
+      description: 'Clear explanations with essential details. Perfect for understanding the "why" behind concepts.',
+      icon: '📚',
+      demo: 'async/await is syntactic sugar over Promises. It lets you write asynchronous code that reads synchronously, making concurrent operations cleaner and more readable.'
     },
     Pro: {
       title: 'Deep Technical Dive',
-      description: 'In-depth technical analysis, edge cases, optimization tips. For mastery and production expertise.',
-      icon: '⚙️'
+      description: 'In-depth analysis, edge cases, and optimization tips for production expertise.',
+      icon: '⚙️',
+      demo: 'async/await uses generator semantics. When you await a Promise, control suspends until resolution. Sequential composition of concurrent operations with zero overhead vs Promise.then().'
     }
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Mode Selector */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className={`${typography.h2} mb-6`}>Adaptive Learning Modes</h2>
-            <p className={`${typography.lead} mb-8`}>
-              Choose how you want to learn. GyaanForge adapts its explanations to match your skill level.
-            </p>
+    <Section className="bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        {/* Mode Selection */}
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+        >
+          <h2 className="text-apple-headline mb-6">Adaptive Learning Modes</h2>
+          <p className="text-apple-subheadline mb-12">
+            GyaanForge adapts to your skill level. Choose your learning style.
+          </p>
+          
+          {/* Mode Selector Buttons */}
+          <div className="space-y-3">
+            {(Object.keys(modes) as Array<keyof typeof modes>).map((mode) => (
+              <motion.button
+                key={mode}
+                onClick={() => setSelectedMode(mode)}
+                className={`w-full p-4 text-left rounded-2xl transition-all duration-300 ${
+                  selectedMode === mode
+                    ? 'liquid-glass bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800'
+                    : 'liquid-glass hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="flex items-center gap-4">
+                  <span className="text-3xl">{modes[mode].icon}</span>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{mode}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{modes[mode].title}</p>
+                  </div>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
 
-            {/* Mode Toggle */}
-            <div className="flex gap-2 mb-8 bg-white dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700 w-fit">
-              {(Object.keys(modeDescriptions) as Mode[]).map((mode) => (
-                <motion.button
-                  key={mode}
-                  onClick={() => setSelectedMode(mode)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                    selectedMode === mode
-                      ? 'bg-black text-white dark:bg-white dark:text-black'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                >
-                  {mode}
-                </motion.button>
-              ))}
-            </div>
-
-            {/* Mode Description */}
+        {/* Live Preview */}
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="liquid-glass-lg p-12">
             <AnimatePresence mode="wait">
               <motion.div
                 key={selectedMode}
@@ -73,193 +113,135 @@ function ModeDemoSection() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
-                className="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700"
+                className="space-y-6"
               >
                 <div className="flex items-start gap-4">
-                  <span className="text-4xl">{modeDescriptions[selectedMode].icon}</span>
+                  <span className="text-5xl">{modes[selectedMode].icon}</span>
                   <div>
-                    <h3 className={`${typography.h4} mb-2`}>{modeDescriptions[selectedMode].title}</h3>
-                    <p className={typography.body}>{modeDescriptions[selectedMode].description}</p>
+                    <h4 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                      {modes[selectedMode].title}
+                    </h4>
+                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+                      {modes[selectedMode].description}
+                    </p>
+                    <div className="bg-white/50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                      <p className="text-gray-900 dark:text-white italic">{modes[selectedMode].demo}</p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
             </AnimatePresence>
-          </motion.div>
-
-          {/* Sample Explanation Preview */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-          >
-              <Card variant="glass" className="p-6 min-h-96">
-              <div className="flex items-center gap-2 mb-4">
-                <Badge variant="default">Sample Response</Badge>
-                <Badge variant="success">Live Preview</Badge>
-              </div>
-              
-              <AnimatePresence mode="wait">
-                {selectedMode === 'Beginner' && (
-                  <motion.div
-                    key="beginner"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="space-y-3"
-                  >
-                    <h4 className={`${typography.h4}`}>What is async/await?</h4>
-                    <p className={typography.body}>
-                      Think of it like ordering pizza. You place the order (async) and continue watching TV while waiting. When the pizza arrives (await), you get it. You don&apos;t have to stare at the door! 🍕
-                    </p>
-                    <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-lg border-l-4 border-blue-500">
-                      <p className={`${typography.small}`}><strong>Key idea:</strong> Let JavaScript keep working while waiting for results.</p>
-                    </div>
-                  </motion.div>
-                )}
-                
-                {selectedMode === 'Student' && (
-                  <motion.div
-                    key="student"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="space-y-3"
-                  >
-                    <h4 className={`${typography.h4}`}>What is async/await?</h4>
-                    <p className={typography.body}>
-                      Async/await is syntactic sugar over Promises that lets you write asynchronous code that looks synchronous. It makes handling concurrent operations cleaner and more readable.
-                    </p>
-                    <code className="text-xs bg-gray-900 text-gray-100 p-2 rounded block whitespace-pre-wrap">
-{`const data = await fetchData();
-// Code waits here until Promise resolves`}
-                    </code>
-                    <p className={`${typography.small}`}><strong>Why use it?</strong> Better readability than promise chains; easier error handling with try/catch.</p>
-                  </motion.div>
-                )}
-                
-                {selectedMode === 'Pro' && (
-                  <motion.div
-                    key="pro"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="space-y-3"
-                  >
-                    <h4 className={`${typography.h4}`}>What is async/await?</h4>
-                    <p className={typography.body}>
-                      Async/await is a syntactic abstraction over Promises that uses generator-like semantics. When you await a Promise, control is suspended until resolution, enabling sequential composition of concurrent operations.
-                    </p>
-                    <code className="text-xs bg-gray-900 text-gray-100 p-2 rounded block whitespace-pre-wrap">
-{`async fn() => {
-  const [a, b] = await Promise.all([fetch1(), fetch2()]);
-  // Parallel execution with sequential syntax
-}`}
-                    </code>
-                    <div className="space-y-1 text-xs">
-                      <p><strong>Performance:</strong> Zero overhead vs Promise.then(); compiled to identical bytecode.</p>
-                      <p><strong>Gotcha:</strong> Sequential awaits don&apos;t parallelize. Use Promise.all() for concurrent ops.</p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </Card>
-          </motion.div>
-    </div>
+          </div>
+        </motion.div>
+      </div>
+    </Section>
   )
 }
 
-// Hybrid Intelligence Demo
-function HybridDemoSection() {
-  const [isOnline, setIsOnline] = useState(true)
+// Features section
+function FeaturesSection() {
+  const features = [
+    { icon: '🧠', title: 'AI-Powered Explanations', description: 'Get instant, adaptive explanations tailored to your learning level.' },
+    { icon: '📊', title: 'Knowledge Graph', description: 'Visualize connections between concepts and build deeper understanding.' },
+    { icon: '⚡', title: 'Real-time Streaming', description: 'See responses stream in real-time as they\'re being generated.' },
+    { icon: '🎯', title: 'Cognitive Load Control', description: 'Choose your complexity level: beginner, student, or pro mode.' },
+    { icon: '📱', title: 'Mobile Optimized', description: 'Learn anywhere with our beautifully designed mobile interface.' },
+    { icon: '🔒', title: 'Privacy First', description: 'Your learning data stays private. No tracking, no ads.' },
+  ]
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center border-t border-gray-200 dark:border-gray-800 pt-12">
-          {/* Text Content */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className={`${typography.h2} mb-6`}>Online/Offline Hybrid</h2>
-            <p className={`${typography.lead} mb-8`}>
-              Never lose access. GyaanForge works online with streaming AI, and offline with smart local patterns.
-            </p>
+    <Section className="bg-white dark:bg-gray-950">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="text-center mb-16"
+      >
+        <h2 className="text-apple-headline mb-4">Why GyaanForge?</h2>
+        <p className="text-apple-subheadline max-w-2xl mx-auto">
+          Designed for learning. Built for mastery. Powered by AI.
+        </p>
+      </motion.div>
 
-            <div className="space-y-4 mb-8">
-              <Card>
-                <Badge variant="success" className="mb-3">🌐 Online Mode</Badge>
-                <h4 className={`${typography.h4} mb-2`}>Streaming AI Explanations</h4>
-                <p className={typography.body}>Connected to Groq for real-time, token-by-token streaming explanations.</p>
-              </Card>
-
-              <Card>
-                <Badge variant="warning" className="mb-3">📡 Offline Mode</Badge>
-                <h4 className={`${typography.h4} mb-2`}>Local Pattern Matching</h4>
-                <p className={typography.body}>Use built-in knowledge for common errors, concepts, and questions.</p>
-              </Card>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsOnline(!isOnline)}
-                className={`px-6 py-3 rounded-xl font-medium transition-all ${
-                  isOnline
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-amber-600 text-white'
-                }`}
-              >
-                {isOnline ? '🌐 Switch to Offline' : '📡 Switch to Online'}
-              </motion.button>
-              <span className={typography.small}>
-                Currently: {isOnline ? 'Online' : 'Offline'}
-              </span>
-            </div>
-          </motion.div>
-
-          {/* Demo Card */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-          >
-            <Card variant={isOnline ? 'glass' : 'default'} className="p-8 min-h-96 flex flex-col justify-between border-l-4 border-amber-600">
-              <div>
-                <Badge variant={isOnline ? 'success' : 'warning'} className="mb-4">
-                  {isOnline ? '🌐 Online' : '📡 Offline'}
-                </Badge>
-                <h3 className={`${typography.h3} mb-4`}>
-                  {isOnline ? 'AI-Powered' : 'Local Pattern'}
-                </h3>
-                <p className={typography.body}>
-                  {isOnline
-                    ? 'Real-time streaming from advanced LLMs. Intelligent routing based on query complexity. Fallback to local when offline.'
-                    : 'Lightning-fast local inference. Pattern-based responses for common questions. Zero latency, no API calls needed.'}
-                </p>
-              </div>
-              
-              <motion.div
-                animate={{ y: isOnline ? 0 : 10 }}
-                className="mt-8 p-4 bg-gray-900/10 dark:bg-white/5 rounded-lg border border-gray-200/50 dark:border-white/10"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl">{isOnline ? '✨' : '⚡'}</span>
-                  <span className={typography.small}>
-                    {isOnline ? 'Streaming response...' : 'Instant response'}
-                  </span>
-                </div>
-                <div className="text-xs text-gray-600 dark:text-gray-400">
-                  {isOnline ? 'Token-by-token delivery' : 'Cached pattern match'}
-                </div>
-              </motion.div>
-            </Card>
-          </motion.div>
-    </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {features.map((feature, i) => (
+          <FeatureCard key={i} {...feature} />
+        ))}
+      </div>
+    </Section>
   )
 }
+
+// Performance section
+function PerformanceSection() {
+  const stats = [
+    { label: 'Response Time', value: '<100ms' },
+    { label: 'Accuracy', value: '98%' },
+    { label: 'Uptime', value: '99.9%' },
+  ]
+
+  return (
+    <Section className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
+      <div className="text-center mb-16">
+        <h2 className="text-apple-headline mb-4">Built for Performance</h2>
+        <p className="text-apple-subheadline">Lightning-fast, reliable, and always available when you need it.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {stats.map((stat, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.1 }}
+            className="liquid-glass p-8 text-center"
+          >
+            <div className="text-5xl font-bold text-blue-600 dark:text-blue-400 mb-2">{stat.value}</div>
+            <div className="text-gray-600 dark:text-gray-400">{stat.label}</div>
+          </motion.div>
+        ))}
+      </div>
+    </Section>
+  )
+}
+
+// CTA Section
+function CTASection() {
+  return (
+    <Section className="bg-gradient-to-br from-blue-600 to-purple-600 dark:from-blue-700 dark:to-purple-700 text-white">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="text-center max-w-2xl mx-auto"
+      >
+        <h2 className="text-apple-headline mb-6 text-white">Ready to Learn?</h2>
+        <p className="text-apple-subheadline mb-8 text-blue-100">
+          Start your learning journey with GyaanForge today. Adaptive, intelligent, and always with you.
+        </p>
+        <div className="flex gap-4 justify-center flex-wrap">
+          <Link href="/learn">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-3 rounded-full bg-white text-blue-600 font-semibold hover:bg-blue-50 transition-colors duration-300"
+            >
+              Start Learning
+            </motion.button>
+          </Link>
+          <button
+            onClick={() => {}}
+            className="px-8 py-3 rounded-full border-2 border-white text-white font-semibold hover:bg-white/10 transition-colors duration-300"
+          >
+            Learn More
+          </button>
+        </div>
+      </motion.div>
+    </Section>
+  )
+}
+
 export default function LandingPage() {
   const [isVideoOpen, setIsVideoOpen] = useState(false)
 
@@ -267,175 +249,24 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white dark:bg-gray-950 overflow-hidden">
       <MarketingSubNav />
       
-      <Hero
-        onPrimaryCTA={() => (window.location.href = '/learn')}
-        onSecondaryCTA={() => setIsVideoOpen(true)}
-      />
-
-      {/* FEATURES - Simplified to 4 key ones */}
-      <Section id="highlights" className="py-28 sm:py-32">
-        <Container size="lg">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24"
-          >
-            <div>
-              <div className="text-6xl md:text-7xl font-black mb-8 text-gray-900 dark:text-white">
-                Adapts to You
-              </div>
-              <p className={`${typography.h4} text-gray-700 dark:text-gray-300 leading-relaxed`}>
-                Whether you&apos;re learning your first concept or mastering advanced topics, GyaanForge adjusts in real-time. Beginner mode? Complex technical deep-dive? We&apos;ve got you.
-              </p>
-            </div>
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="aspect-square bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-3xl flex items-center justify-center text-8xl"
-            >
-              🎯
-            </motion.div>
-          </motion.div>
-        </Container>
-      </Section>
-
-      {/* SPACER */}
-      <section className="h-32 md:h-48" />
-
-      {/* MODES - Interactive */}
-      <Section id="modes" className="py-32 bg-gray-50 dark:bg-gray-900/50">
-        <Container size="lg">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <div className="text-6xl md:text-7xl font-black mb-16 text-gray-900 dark:text-white">
-              Choose Your Path
-            </div>
-          </motion.div>
-
-          <ModeDemoSection />
-        </Container>
-      </Section>
-
-      {/* SPACER */}
-      <section className="h-32 md:h-48" />
-
-      {/* HYBRID - Interactive */}
-      <Section id="hybrid" className="py-32">
-        <Container size="lg">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <div className="text-6xl md:text-7xl font-black mb-16 text-gray-900 dark:text-white">
-              Always Connected
-            </div>
-          </motion.div>
-
-          <HybridDemoSection />
-        </Container>
-      </Section>
-
-      {/* SPACER */}
-      <section className="h-32 md:h-48" />
-
-      {/* STATS - Bold display */}
-      <Section id="performance" className="py-32 bg-gray-900 dark:bg-black">
-        <Container size="lg">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-20"
-          >
-            <h2 className="text-6xl md:text-7xl font-black text-white mb-6">Built for You</h2>
-            <p className="text-2xl text-gray-300 max-w-2xl mx-auto">Enterprise-grade performance, simplified.</p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {[
-              { label: 'Response Time', value: '<500ms', icon: '⚡' },
-              { label: 'Learning Modes', value: '3', icon: '🎯' },
-              { label: 'Offline Ready', value: '100%', icon: '📡' },
-              { label: 'WCAG AA', value: 'Certified', icon: '♿' },
-            ].map((stat, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="text-center p-8"
-              >
-                <div className="text-6xl mb-4">{stat.icon}</div>
-                <div className="text-5xl font-black text-white mb-2">{stat.value}</div>
-                <div className="text-xl text-gray-400">{stat.label}</div>
-              </motion.div>
-            ))}
-          </div>
-        </Container>
-      </Section>
-
-      {/* SPACER */}
-      <section className="h-32 md:h-48" />
-
-      {/* FINAL CTA */}
-      <Section className="py-32">
-        <Container size="lg">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="text-center bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-900 dark:to-purple-900 rounded-3xl p-16 md:p-24"
-          >
-            <h2 className="text-5xl md:text-6xl font-black text-white mb-8">
-              Ready?
-            </h2>
-            <p className="text-xl text-white/90 mb-12 max-w-2xl mx-auto">
-              Experience adaptive learning that works for your brain, not against it.
-            </p>
-            <Link href="/learn">
-              <Button 
-                variant="primary" 
-                size="lg"
-                className="bg-white text-blue-600 hover:bg-gray-100 dark:bg-white dark:text-blue-900 px-12 py-4 text-lg"
-              >
-                Start Learning Now
-              </Button>
-            </Link>
-          </motion.div>
-        </Container>
-      </Section>
-
-      {/* SPACER */}
-      <section className="h-16 md:h-32" />
-
-      {/* Footer - Minimal */}
-      <footer className="border-t border-gray-200 dark:border-gray-800 py-16 bg-white dark:bg-gray-950">
-        <Container size="lg">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                © 2024 GyaanForge. Learning reimagined.
-              </p>
-            </div>
-            <div className="flex gap-8 text-sm">
-              <a href="#" className="text-blue-600 hover:underline">Docs</a>
-              <a href="#" className="text-blue-600 hover:underline">Community</a>
-              <a href="#" className="text-blue-600 hover:underline">Twitter</a>
-            </div>
-          </div>
-        </Container>
-      </footer>
+      {/* Hero Section */}
+      <Hero onPlayClick={() => setIsVideoOpen(true)} />
+      
+      {/* Main Sections */}
+      <ModeDemoSection />
+      <FeaturesSection />
+      <PerformanceSection />
+      <CTASection />
 
       {/* Video Modal */}
       <VideoModal isOpen={isVideoOpen} onClose={() => setIsVideoOpen(false)} />
+
+      {/* Footer */}
+      <footer className="bg-gray-100 dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 py-12 px-4">
+        <div className="max-w-7xl mx-auto text-center text-gray-600 dark:text-gray-400">
+          <p>&copy; 2024 GyaanForge. Designed with Apple-style elegance. Built for learning.</p>
+        </div>
+      </footer>
     </div>
   )
 }
