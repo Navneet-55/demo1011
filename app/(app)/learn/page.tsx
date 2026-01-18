@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/Header'
 import { InputPanel } from '@/components/InputPanel'
 import { OutputPanel } from '@/components/OutputPanel'
@@ -95,9 +96,11 @@ export default function LearnPage() {
               </p>
               <div className="flex gap-1 bg-white dark:bg-gray-800 rounded-lg p-0.5 border border-gray-200 dark:border-gray-700">
                 {(Object.keys(COGNITIVE_LOAD_CONFIG) as CognitiveLoadMode[]).map((loadMode) => (
-                  <button
+                  <motion.button
                     key={loadMode}
                     onClick={() => setCognitiveLoad(loadMode)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                       cognitiveLoad === loadMode
                         ? 'bg-black text-white dark:bg-white dark:text-black shadow-sm'
@@ -105,7 +108,7 @@ export default function LearnPage() {
                     }`}
                   >
                     {COGNITIVE_LOAD_CONFIG[loadMode].label}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -120,22 +123,32 @@ export default function LearnPage() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col lg:flex-row gap-4 max-w-[1600px] w-full mx-auto p-4 sm:p-6 lg:p-8">
-        <div className="flex-1 min-w-0">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex-1 min-w-0"
+        >
           <InputPanel
             mode={mode}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={setInput}
             onSubmit={handleSubmit}
             isLoading={isLoading}
           />
-        </div>
+        </motion.div>
 
-        <div className="flex-1 min-w-0">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="flex-1 min-w-0"
+        >
           <OutputPanel
-            output={output}
+            content={output}
             isLoading={isLoading}
           />
-        </div>
+        </motion.div>
       </div>
     </div>
   )

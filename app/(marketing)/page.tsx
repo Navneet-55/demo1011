@@ -117,7 +117,7 @@ export default function MarketingPage() {
             Start learning smarter today.
           </h2>
           <p className="text-lg text-gray-300 mb-10 max-w-2xl mx-auto">
-            Join thousands of learners mastering new skills with GyaanForge's adaptive AI companion.
+            Join thousands of learners mastering new skills with GyaanForge&apos;s adaptive AI companion.
           </p>
           <Button
             variant="primary"
