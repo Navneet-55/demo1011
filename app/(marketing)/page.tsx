@@ -165,7 +165,6 @@ function ModeDemoSection() {
               </AnimatePresence>
             </Card>
           </motion.div>
-        </div>
     </div>
   )
 }
@@ -258,7 +257,6 @@ function HybridDemoSection() {
               </motion.div>
             </Card>
           </motion.div>
-        </div>
     </div>
   )
 }
