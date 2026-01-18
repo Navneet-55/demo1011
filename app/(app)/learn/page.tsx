@@ -63,7 +63,9 @@ export default function LearnPage() {
   }
 
   const handleClearInput = () => setInput('')
-  const handleExampleQuery = (query: string) => setInput(query)
+  const handleExampleQuery = () => {
+    setInput('Explain how async/await works in JavaScript with a practical example.')
+  }
   const handleExportNotes = () => {
     const blob = new Blob([output], { type: 'text/markdown' })
     const url = URL.createObjectURL(blob)
