@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { Chip } from '@/components/ui/primitives'
 import type { CognitiveLoadMode } from '@/types'
 import { useLearningSession } from '@/contexts/LearningSessionContext'
+import { fadeUpSm } from '@/lib/motion/tokens'
 
 interface FeaturesSidebarProps {
   onOpenCommandPalette: () => void
@@ -27,9 +28,9 @@ export function FeaturesSidebar({
 
   return (
     <motion.aside
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3 }}
+      variants={fadeUpSm}
+      initial="initial"
+      animate="animate"
       className="hidden lg:flex lg:flex-col lg:w-64 xl:w-72 bg-white/70 dark:bg-gray-950/70 backdrop-blur-xl border-r border-white/50 dark:border-gray-800/70 p-4 gap-6 overflow-y-auto custom-scrollbar"
     >
       {/* Header */}
