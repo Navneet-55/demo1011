@@ -233,26 +233,46 @@ export default function LearnPage() {
   const currentGraph = getCurrentGraph()
 
   const insightTabs = useMemo(() => {
-    const tabs: Array<{ id: string; label: string; content: React.ReactNode }> = []
+    const tabs: Array<{ id: string; label: string; content: React.ReactNode }> = [];
 
     if (currentGraph) {
-      tabs.push({ id: 'graph', label: 'Graph', content: <div className="h-[70vh] min-h-[480px]"><KnowledgeGraphVisualizer /></div> })
+      tabs.push({
+        id: 'graph',
+        label: 'Graph',
+        content: (
+          <div className="h-[70vh] min-h-[480px]">
+            <KnowledgeGraphVisualizer />
+          </div>
+        ),
+      });
     }
 
     if (metadata?.practice) {
-      tabs.push({ id: 'practice', label: 'Practice', content: <PracticePanel metadata={metadata} /> })
+      tabs.push({
+        id: 'practice',
+        label: 'Practice',
+        content: <PracticePanel metadata={metadata} />,
+      });
     }
 
     if (metadata?.trace) {
-      tabs.push({ id: 'why', label: 'Why', content: <TracePanel metadata={metadata} /> })
+      tabs.push({
+        id: 'why',
+        label: 'Why',
+        content: <TracePanel metadata={metadata} />,
+      });
     }
 
     if (metadata?.quiz) {
-      tabs.push({ id: 'quiz', label: 'Quiz', content: <QuizFlow metadata={metadata} onGenerateQuiz={() => {}} /> })
+      tabs.push({
+        id: 'quiz',
+        label: 'Quiz',
+        content: <QuizFlow metadata={metadata} onGenerateQuiz={() => {}} />,
+      });
     }
 
-    return tabs
-  }, [currentGraph, metadata])
+    return tabs;
+  }, [currentGraph, metadata]);
 
   useEffect(() => {
     if (insightTabs.length > 0 && !activeInsightTab) {
