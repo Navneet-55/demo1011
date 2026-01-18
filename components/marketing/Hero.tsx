@@ -152,3 +152,4 @@ export function Hero({ onPlayClick, onPrimaryCTA, onSecondaryCTA }: HeroProps) {
       </div>
     </section>
   )
+}
