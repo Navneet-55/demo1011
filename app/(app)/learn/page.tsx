@@ -1,18 +1,26 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/Header'
 import { InputPanel } from '@/components/InputPanel'
 import { OutputPanel } from '@/components/OutputPanel'
 import { useMode } from '@/components/ModeProvider'
 import { useOnlineOffline } from '@/contexts/OnlineOfflineContext'
-import { Badge, Button } from '@/components/ui/primitives'
+import { Badge } from '@/components/ui/primitives'
 import { ContextBar } from '@/components/ui'
 import type { ContextBarItem } from '@/components/ui/ContextBar'
+import { Drawer } from '@/components/ui'
+import { Chip } from '@/components/ui/primitives'
+import { KnowledgeGraphVisualizer } from '@/components/KnowledgeGraphVisualizer'
+import { PracticePanel } from '@/components/PracticePanel'
+import { TracePanel } from '@/components/TracePanel'
+import { QuizFlow } from '@/components/QuizFlow'
 import type { CognitiveLoadMode } from '@/types'
 import { COGNITIVE_LOAD_CONFIG } from '@/lib/constants'
 import { useLearningSession } from '@/contexts/LearningSessionContext'
+import { useKnowledgeGraph } from '@/contexts/KnowledgeGraphContext'
+import type { ResponseMetadata } from '@/types/api-contract'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,6 +28,7 @@ export default function LearnPage() {
   const { mode } = useMode()
   const { effectiveMode } = useOnlineOffline()
   const { state, setTimebox, setPerspective, setFutureYou } = useLearningSession()
+  const { getCurrentGraph } = useKnowledgeGraph()
   const [input, setInput] = useState('')
   const [output, setOutput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -27,6 +36,9 @@ export default function LearnPage() {
   const [showContextBar, setShowContextBar] = useState(false)
   const [contextBarHidden, setContextBarHidden] = useState(false)
   const scrollHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [isInsightsOpen, setIsInsightsOpen] = useState(false)
+  const [activeInsightTab, setActiveInsightTab] = useState<string>('')
+  const [metadata] = useState<ResponseMetadata | null>(null)
 
   const handleSubmit = async () => {
     if (!input.trim() || isLoading) return
@@ -90,6 +102,13 @@ export default function LearnPage() {
     setShowContextBar(hasContent && !isLoading)
   }, [output, isLoading])
 
+  // Reset insights when there is no supporting data
+  useEffect(() => {
+    if (!metadata && !getCurrentGraph()) {
+      setIsInsightsOpen(false)
+    }
+  }, [metadata, getCurrentGraph])
+
   // Auto-hide on scroll with gentle return
   const handleOutputScroll = (e: React.UIEvent<HTMLDivElement>) => {
     if (scrollHideTimer.current) {
@@ -151,6 +170,40 @@ export default function LearnPage() {
     },
   ]
 
+  const currentGraph = getCurrentGraph()
+
+  const insightTabs = useMemo(() => {
+    const tabs: Array<{ id: string; label: string; content: React.ReactNode }> = []
+
+    if (currentGraph) {
+      tabs.push({ id: 'graph', label: 'Graph', content: <div className="h-[70vh] min-h-[480px]"><KnowledgeGraphVisualizer /></div> })
+    }
+
+    if (metadata?.practice) {
+      tabs.push({ id: 'practice', label: 'Practice', content: <PracticePanel metadata={metadata} /> })
+    }
+
+    if (metadata?.trace) {
+      tabs.push({ id: 'why', label: 'Why', content: <TracePanel metadata={metadata} /> })
+    }
+
+    if (metadata?.quiz) {
+      tabs.push({ id: 'quiz', label: 'Quiz', content: <QuizFlow metadata={metadata} onGenerateQuiz={() => {}} /> })
+    }
+
+    return tabs
+  }, [currentGraph, metadata])
+
+  useEffect(() => {
+    if (insightTabs.length > 0 && !activeInsightTab) {
+      setActiveInsightTab(insightTabs[0].id)
+    }
+    if (insightTabs.length === 0) {
+      setActiveInsightTab('')
+      setIsInsightsOpen(false)
+    }
+  }, [insightTabs, activeInsightTab])
+
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-950">
       <Header 
@@ -196,7 +249,7 @@ export default function LearnPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 max-w-[1600px] w-full mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 max-w-[1600px] w-full mx-auto p-4 sm:p-6 lg:p-8 relative">
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -231,8 +284,82 @@ export default function LearnPage() {
             isLoading={isLoading}
             onScroll={handleOutputScroll}
           />
+
+          {/* Insights Drawer affordance */}
+          <AnimatePresence>
+            {insightTabs.length > 0 && output.trim().length > 0 && (
+              <motion.button
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0, transition: { duration: 0.2 } }}
+                exit={{ opacity: 0, x: 12, transition: { duration: 0.15 } }}
+                onClick={() => setIsInsightsOpen(true)}
+                className="hidden lg:flex items-center gap-2 absolute right-[-14px] top-1/2 -translate-y-1/2 px-3 py-2 rounded-full bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border border-white/50 dark:border-gray-800/70 shadow-lg hover:shadow-xl transition-all"
+                aria-label="Open insights drawer"
+              >
+                <span className="text-sm">✦</span>
+                <span className="text-xs font-medium text-gray-700 dark:text-gray-200">Insights</span>
+              </motion.button>
+            )}
+          </AnimatePresence>
         </motion.div>
       </div>
+
+      {/* Mobile/Tablet affordance */}
+      <AnimatePresence>
+        {insightTabs.length > 0 && output.trim().length > 0 && (
+          <motion.button
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.2 } }}
+            exit={{ opacity: 0, y: 8, transition: { duration: 0.15 } }}
+            onClick={() => setIsInsightsOpen(true)}
+            className="lg:hidden fixed bottom-4 right-4 px-4 py-2 rounded-full bg-white/90 dark:bg-gray-950/90 backdrop-blur-xl border border-white/60 dark:border-gray-800/70 shadow-lg flex items-center gap-2 z-30"
+            aria-label="Open insights drawer"
+          >
+            <span className="text-sm">✦</span>
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-200">Insights</span>
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Insights Drawer */}
+      <Drawer
+        isOpen={isInsightsOpen}
+        onClose={() => setIsInsightsOpen(false)}
+        side="right"
+        width="lg"
+        title="Insights"
+        description="Contextual depth when you need it"
+      >
+        {insightTabs.length > 0 ? (
+          <div className="flex flex-col gap-4 h-full">
+            <div className="flex items-center gap-2 flex-wrap">
+              {insightTabs.map((tab) => (
+                <Chip
+                  key={tab.id}
+                  size="sm"
+                  variant={activeInsightTab === tab.id ? 'solid' : 'glass'}
+                  active={activeInsightTab === tab.id}
+                  onClick={() => setActiveInsightTab(tab.id)}
+                >
+                  {tab.label}
+                </Chip>
+              ))}
+            </div>
+
+            <div className="flex-1 min-h-[400px] overflow-hidden rounded-2xl border border-white/40 dark:border-gray-800/70 bg-white/70 dark:bg-gray-950/70 backdrop-blur-xl p-4 shadow-inner">
+              {insightTabs.map((tab) => (
+                tab.id === activeInsightTab ? (
+                  <div key={tab.id} className="h-full overflow-y-auto custom-scrollbar">
+                    {tab.content}
+                  </div>
+                ) : null
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="text-sm text-gray-500 dark:text-gray-400">No insights available.</div>
+        )}
+      </Drawer>
     </div>
   )
 }
