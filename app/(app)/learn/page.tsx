@@ -286,8 +286,8 @@ export default function LearnPage() {
                   <motion.button
                     key={loadMode}
                     onClick={() => setCognitiveLoad(loadMode)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={gestures.hoverLift}
+                    whileTap={gestures.press}
                     className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                       cognitiveLoad === loadMode
                         ? 'bg-black text-white dark:bg-white dark:text-black shadow-sm'
