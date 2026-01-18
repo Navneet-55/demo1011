@@ -28,7 +28,7 @@ export default function LearnPage() {
   const { mode } = useMode()
   const { effectiveMode } = useOnlineOffline()
   const { state, setTimebox, setPerspective, setFutureYou } = useLearningSession()
-  const { getCurrentGraph } = useKnowledgeGraph()
+  const { getCurrentGraph, addGraph } = useKnowledgeGraph()
   const [input, setInput] = useState('')
   const [output, setOutput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -38,7 +38,7 @@ export default function LearnPage() {
   const scrollHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [isInsightsOpen, setIsInsightsOpen] = useState(false)
   const [activeInsightTab, setActiveInsightTab] = useState<string>('')
-  const [metadata] = useState<ResponseMetadata | null>(null)
+  const [metadata, setMetadata] = useState<ResponseMetadata | null>(null)
 
   const handleSubmit = async () => {
     if (!input.trim() || isLoading) return
