@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Container, Button, Badge, typography } from '@/components/ui/primitives'
+import { Container, Button, Badge } from '@/components/ui/primitives'
 
 type HeroProps = {
   onPrimaryCTA?: () => void

@@ -7,6 +7,7 @@ import { VideoModal } from '@/components/marketing/VideoModal'
 import { Container, Section, Card, Button, Badge, typography } from '@/components/ui/primitives'
 import type { Mode } from '@/components/ModeProvider'
 import Link from 'next/link'
+import { Hero } from '@/components/marketing/Hero'
 
 export const dynamic = 'force-dynamic'
 
@@ -268,126 +269,13 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white dark:bg-gray-950 overflow-hidden">
       <MarketingSubNav />
       
-      {/* HERO - Full Viewport */}
-      <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden bg-white dark:bg-gray-950">
-        {/* Animated background */}
-        <motion.div
-          animate={{ backgroundPosition: ['0% 0%', '100% 100%'] }}
-          transition={{ duration: 20, repeat: Infinity, repeatType: 'reverse' }}
-          className="absolute inset-0 opacity-30 dark:opacity-10"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.2), transparent 50%), radial-gradient(circle at 80% 80%, rgba(147, 51, 234, 0.2), transparent 50%)',
-            backgroundSize: '200% 200%',
-          }}
-        />
-
-        <Container size="xl" className="relative z-10 py-32">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center max-w-5xl mx-auto"
-          >
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="mb-8 flex justify-center"
-            >
-              <Badge variant="gradient">✨ The Future of Learning is Here</Badge>
-            </motion.div>
-
-            {/* Main Headline */}
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.8 }}
-              className="text-7xl md:text-8xl lg:text-9xl font-black leading-tight mb-8 bg-gradient-to-r from-gray-900 via-blue-600 to-purple-600 dark:from-white dark:via-blue-400 dark:to-purple-400 bg-clip-text text-transparent"
-            >
-              Learn Smarter<br />Not Harder
-            </motion.h1>
-
-            {/* Subheading */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.8 }}
-              className="text-2xl md:text-3xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto mb-12 leading-relaxed font-light"
-            >
-              AI that adapts to you. Real-time explanations. Works offline. Always with you.
-            </motion.p>
-
-            {/* CTA Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.8 }}
-              className="flex flex-col sm:flex-row gap-6 justify-center mb-16"
-            >
-              <Link href="/learn">
-                <Button variant="primary" size="lg" className="px-12 py-4 text-lg">
-                  Try for Free
-                </Button>
-              </Link>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsVideoOpen(true)}
-                className="px-12 py-4 text-lg font-semibold rounded-2xl border-2 border-gray-900 dark:border-white text-gray-900 dark:text-white hover:bg-gray-900/5 dark:hover:bg-white/5 transition-all"
-              >
-                Watch Demo
-              </motion.button>
-            </motion.div>
-          </motion.div>
-
-          {/* Hero Video Placeholder */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9, duration: 0.8 }}
-            className="mt-12"
-          >
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="relative w-full aspect-video bg-gradient-to-br from-blue-600 to-purple-600 rounded-3xl overflow-hidden shadow-2xl cursor-pointer group"
-              onClick={() => setIsVideoOpen(true)}
-            >
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                  <motion.div
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center"
-                  >
-                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                      <svg className="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </div>
-                  </motion.div>
-                  <p className="text-white text-xl font-semibold">Watch the Magic</p>
-                </div>
-              </div>
-              <motion.div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                animate={{ backgroundPosition: ['0% 0%', '100% 100%'] }}
-                transition={{ duration: 3, repeat: Infinity, repeatType: 'reverse' }}
-                style={{
-                  backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1), transparent)',
-                  backgroundSize: '200% 200%',
-                }}
-              />
-            </motion.div>
-          </motion.div>
-        </Container>
-      </section>
-
-      {/* SPACER - Massive whitespace */}
-      <section className="h-32 md:h-48" />
+      <Hero
+        onPrimaryCTA={() => (window.location.href = '/learn')}
+        onSecondaryCTA={() => setIsVideoOpen(true)}
+      />
 
       {/* FEATURES - Simplified to 4 key ones */}
-      <Section id="highlights" className="py-32">
+      <Section id="highlights" className="py-28 sm:py-32">
         <Container size="lg">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
