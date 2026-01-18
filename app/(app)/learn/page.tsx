@@ -185,6 +185,13 @@ export default function LearnPage() {
     setPerspective(next)
   }
 
+  const cycleCognitiveLoad = () => {
+    const order: CognitiveLoadMode[] = ['balanced', 'speed', 'mastery', 'overwhelmed']
+    const idx = order.indexOf(cognitiveLoad)
+    const next = order[(idx + 1) % order.length]
+    setCognitiveLoad(next)
+  }
+
   const contextItems: ContextBarItem[] = [
     {
       id: 'timebox',
@@ -225,6 +232,31 @@ export default function LearnPage() {
 
   const insightTabs = useMemo(() => {
     const tabs: Array<{ id: string; label: string; content: React.ReactNode }> = []
+
+    if (output.trim().length > 0) {
+      tabs.push({
+        id: 'actions',
+        label: 'Actions',
+        content: (
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <Chip size="sm" variant="glass" onClick={() => setIsCommandPaletteOpen(true)}>Explain selection</Chip>
+              <Chip size="sm" variant="glass" onClick={() => setIsCommandPaletteOpen(true)}>Compare concepts</Chip>
+              <Chip size="sm" variant="glass" onClick={() => setIsCommandPaletteOpen(true)}>Learning path</Chip>
+              <Chip size="sm" variant="glass" onClick={() => setIsCommandPaletteOpen(true)}>Explain diff / PR</Chip>
+              <Chip size="sm" variant="glass" onClick={() => { setIsInsightsOpen(true); setActiveInsightTab('quiz') }}>Start quiz</Chip>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Chip size="sm" variant={state.futureYou ? 'solid' : 'glass'} active={state.futureYou} onClick={() => setFutureYou(!state.futureYou)}>Future-You</Chip>
+              <Chip size="sm" variant="glass" onClick={cyclePerspective}>Switch perspective</Chip>
+              <Chip size="sm" variant="glass" onClick={cycleTimebox}>Switch timebox</Chip>
+              <Chip size="sm" variant="glass" onClick={cycleCognitiveLoad}>Cognitive load</Chip>
+              <Chip size="sm" variant="glass" onClick={() => setIsCommandPaletteOpen(true)}>Open Vault</Chip>
+            </div>
+          </div>
+        ),
+      })
+    }
 
     if (currentGraph) {
       tabs.push({ id: 'graph', label: 'Graph', content: <div className="h-[70vh] min-h-[480px]"><KnowledgeGraphVisualizer /></div> })
@@ -411,6 +443,11 @@ export default function LearnPage() {
           <div className="text-sm text-gray-500 dark:text-gray-400">No insights available.</div>
         )}
       </Drawer>
+
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+      />
     </div>
   )
 }
