@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/Header'
 import { InputPanel } from '@/components/InputPanel'
@@ -26,7 +26,7 @@ export default function LearnPage() {
   const [cognitiveLoad, setCognitiveLoad] = useState<CognitiveLoadMode>('balanced')
   const [showContextBar, setShowContextBar] = useState(false)
   const [contextBarHidden, setContextBarHidden] = useState(false)
-  const scrollHideTimer = useRef<NodeJS.Timeout | null>(null)
+  const scrollHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleSubmit = async () => {
     if (!input.trim() || isLoading) return
