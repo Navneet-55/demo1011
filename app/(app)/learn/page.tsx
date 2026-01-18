@@ -396,9 +396,8 @@ export default function LearnPage() {
             )}
           </AnimatePresence>
         </motion.div>
-      </div>
 
-      {/* Mobile/Tablet affordance */}
+        {/* Mobile/Tablet affordance */}
       <AnimatePresence>
         {insightTabs.length > 0 && output.trim().length > 0 && (
           <motion.button
@@ -414,8 +413,8 @@ export default function LearnPage() {
           </motion.button>
         )}
       </AnimatePresence>
-        </div>
       </div>
+    </div>
 
       {/* Insights Drawer */}
       <Drawer
