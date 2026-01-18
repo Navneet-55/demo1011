@@ -416,7 +416,6 @@ export default function LearnPage() {
       </AnimatePresence>
         </div>
       </div>
-      </div>
 
       {/* Insights Drawer */}
       <Drawer
