@@ -1,36 +1,18 @@
-# 🎊 GyaanForge - PRODUCTION READY! 
+# ✨ GyaanForge - Start Here
 
-## 🚀 PROJECT STATUS: COMPLETE & DEPLOYED ✅
+Welcome to **GyaanForge**, an enterprise-grade AI learning platform.
 
+## 🚀 Quick Start (5 Minutes)
+
+```bash
+git clone https://github.com/Navneet-55/new1.git
+cd new1
+npm install
+cp .env.example .env.local
+# Add your Groq API key from https://console.groq.com/keys
+npm run dev
+# Open http://localhost:3000
 ```
-╔════════════════════════════════════════════════════════════════╗
-║                    🎉 GyaanForge v2.0.0 🎉                    ║
-║                                                                ║
-║       Enterprise-Grade AI Learning Platform - COMPLETE        ║
-║                                                                ║
-║   ✅ Built ✅ Refined ✅ Tested ✅ Optimized ✅ Documented   ║
-║   ✅ Production Ready ✅ Deployment Ready ✅ Scalable         ║
-║                                                                ║
-║            Quality: ⭐⭐⭐⭐⭐ (5/5 Stars)                   ║
-║            Bundle: 310 kB (-21% optimized)                    ║
-║            Errors: 0 (Zero-crash guarantee)                   ║
-║                                                                ║
-╚════════════════════════════════════════════════════════════════╝
-```
-
----
-
-## 📦 WHAT'S NEW IN THIS VERSION
-
-### 🆕 Advanced Refinements Added
-- ✅ 4 new enterprise utility modules (960+ lines)
-- ✅ Centralized constants & configuration management
-- ✅ 20+ type guards for compile-time safety
-- ✅ 12 custom React hooks library
-- ✅ Professional logging & error handling
-- ✅ 50+ error handlers for graceful degradation
-- ✅ 21% bundle size optimization
-- ✅ Full TypeScript strict mode compliance
 
 ### ✨ All Features Functional
 - ✅ 7 Advanced Learning Features (Timebox, Perspective, Future-You, Trace, Practice, Quiz, Stuck Detection)
