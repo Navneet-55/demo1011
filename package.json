@@ -1,12 +1,17 @@
 {
   "name": "gyaanforge",
-  "version": "1.0.0",
+  "version": "2.0.0",
+  "description": "Enterprise-grade AI-powered learning platform with adaptive explanations",
+  "author": "GyaanForge Team",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -35,5 +40,9 @@
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }
