@@ -27,13 +27,19 @@ const CONCEPT_EXTRACTION_CONFIG = {
   DEPENDENCY_STRENGTH: 0.9,
 } as const;
 
+/**
+ * Extracts concepts and relationships from text to build a knowledge graph
+ * @param text - The source text to analyze
+ * @param query - The user's query to contextualize the extraction
+ * @returns A knowledge graph with nodes and links representing concepts and relationships
+ */
 export function extractConceptsFromText(text: string, query: string): KnowledgeGraph {
-  if (!text || !query) {
+  if (!text?.trim() || !query?.trim()) {
     return {
       nodes: [],
       links: [],
       timestamp: Date.now(),
-      context: query,
+      context: query || '',
     };
   }
 
@@ -49,7 +55,14 @@ export function extractConceptsFromText(text: string, query: string): KnowledgeG
 
   // Process extracted patterns
   processConcepts(headers, concepts, conceptSet, text, 'core');
-  processConcepts(boldConcepts.slice(0, CONCEPT_EXTRACTION_CONFIG.MAX_BOLD_CONCEPTS), concepts, conceptSet, text, 'related', CONCEPT_EXTRACTION_CONFIG.MAX_CONCEPT_WORDS);
+  processConcepts(
+    boldConcepts.slice(0, CONCEPT_EXTRACTION_CONFIG.MAX_BOLD_CONCEPTS),
+    concepts,
+    conceptSet,
+    text,
+    'related',
+    CONCEPT_EXTRACTION_CONFIG.MAX_CONCEPT_WORDS
+  );
   processCodeReferences(codeReferences, concepts, conceptSet, CONCEPT_EXTRACTION_CONFIG.MAX_CODE_REFERENCES);
 
   // Add main query concept
@@ -164,15 +177,22 @@ function addMainQueryConcept(
 
 /**
  * Create links from relationships, matching concepts to nodes
+ * Uses a Map for O(1) lookups instead of O(n) find operations
  */
 function createLinksFromRelationships(
   relationships: ExtractedRelationship[],
   nodes: ConceptNode[],
   links: ConceptLink[]
 ): void {
+  // Build a lookup map for better performance
+  const nodeMap = new Map<string, ConceptNode>();
+  nodes.forEach(node => {
+    nodeMap.set(node.label.toLowerCase(), node);
+  });
+
   relationships.forEach(rel => {
-    const sourceNode = nodes.find(n => n.label.toLowerCase() === rel.from.toLowerCase());
-    const targetNode = nodes.find(n => n.label.toLowerCase() === rel.to.toLowerCase());
+    const sourceNode = nodeMap.get(rel.from.toLowerCase());
+    const targetNode = nodeMap.get(rel.to.toLowerCase());
 
     if (sourceNode && targetNode) {
       links.push({
@@ -206,8 +226,11 @@ function addGenericConceptNodes(
 
 /**
  * Create default connections if relationship graph is sparse
+ * Connects the first node to up to 3 subsequent nodes
  */
 function createDefaultConnections(nodes: ConceptNode[], links: ConceptLink[]): void {
+  if (nodes.length < 2) return;
+  
   const maxConnections = Math.min(nodes.length - 1, 3);
   for (let i = 1; i <= maxConnections; i++) {
     links.push({
@@ -219,35 +242,37 @@ function createDefaultConnections(nodes: ConceptNode[], links: ConceptLink[]): v
   }
 }
 
+/**
+ * Extracts a description for a concept by finding the sentence containing it
+ */
 function extractDescriptionForConcept(text: string, concept: string): string | undefined {
   const escapedConcept = concept.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp(`${escapedConcept}[^.]*\\.`, 'i');
+  const regex = new RegExp(`${escapedConcept}[^.!?]{0,200}[.!?]`, 'i');
   const match = text.match(regex);
 
-  if (match) {
-    return match[0].trim().slice(0, 150);
-  }
-
-  return undefined;
+  return match ? match[0].trim().slice(0, 150) : undefined;
 }
 
+/**
+ * Extracts the main concept from a user query by removing question words
+ */
 function extractMainConceptFromQuery(query: string): string | null {
-  // Remove common question words
+  // Remove common question words and punctuation
   const cleaned = query
     .toLowerCase()
-    .replace(/^(what|how|why|when|where|explain|tell me about|describe)\s+/i, '')
-    .replace(/\?$/, '')
+    .replace(/^(what|how|why|when|where|who|explain|tell me about|describe)\s+(is|are|does|do)?\s*/i, '')
+    .replace(/[?!.]+$/, '')
     .trim();
 
   // Extract key phrases (capitalize first letter)
-  const words = cleaned.split(/\s+/).filter(w => w.length > 0);
+  const words = cleaned.split(/\s+/).filter(w => w.length > 0 && w.length < 20);
   if (words.length === 0) return null;
 
   if (words.length <= 4) {
     return capitalizeWords(words);
   }
 
-  // Take first few words
+  // Take first few meaningful words
   return capitalizeWords(words.slice(0, 3));
 }
 
@@ -260,19 +285,24 @@ function capitalizeWords(words: string[]): string {
     .join(' ');
 }
 
+/**
+ * Infers relationships between concepts based on their types and text analysis
+ */
 function inferRelationships(concepts: ExtractedConcept[], text: string): ExtractedRelationship[] {
   const relationships: ExtractedRelationship[] = [];
 
-  // Segment concepts by type
+  // Segment concepts by type for efficient processing
   const coreConcepts = concepts.filter(c => c.type === 'core');
   const relatedConcepts = concepts.filter(c => c.type === 'related');
   const examples = concepts.filter(c => c.type === 'example');
 
   // Connect core concepts to related concepts and examples
   coreConcepts.forEach(core => {
-    // Connect to related concepts
+    const coreLower = core.name.toLowerCase();
+    
+    // Connect to related concepts (limit to 3 for graph clarity)
     relatedConcepts.slice(0, 3).forEach(related => {
-      if (core.name !== related.name) {
+      if (coreLower !== related.name.toLowerCase()) {
         relationships.push({
           from: core.name,
           to: related.name,
@@ -282,9 +312,9 @@ function inferRelationships(concepts: ExtractedConcept[], text: string): Extract
       }
     });
 
-    // Connect examples
+    // Connect examples (limit to 2 to avoid clutter)
     examples.slice(0, 2).forEach(example => {
-      if (core.name !== example.name) {
+      if (coreLower !== example.name.toLowerCase()) {
         relationships.push({
           from: example.name,
           to: core.name,
